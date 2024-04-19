@@ -1,7 +1,7 @@
 # Importing necessary libraries
 import dash
-from dash import dcc, html, Input, Output, State, dash_table
 import pandas as pd
+from dash import dcc, html, Input, Output, State, dash_table
 
 # # Sample DataFrame of soccer players and stats
 # df = pd.DataFrame({
@@ -20,62 +20,63 @@ import pandas as pd
 # })
 
 
-df = pd.read_csv('/Users/claytroyer/Downloads/sample_camp.csv')
+df = pd.read_csv("assets/data/camp_players_info.csv")
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
 # Define the layout of the app
-app.layout = html.Div(children=[
-    html.H1("INP Stats"),
-    
-    # Search bar for filtering/sorting the table
-    dcc.Input(id='search-input', type='text', placeholder='Search...'),
+app.layout = html.Div(
+    children=[
+        html.H1("INP Stats"),
+        # Search bar for filtering/sorting the table
+        dcc.Input(id="search-input", type="text", placeholder="Search..."),
+        # Table displaying soccer players stats
+        dash_table.DataTable(
+            id="table",
+            columns=[{"name": i, "id": i} for i in df.columns],
+            data=df.to_dict("records"),
+            row_selectable="single",  # Allow selecting only one row at a time
+            style_table={"overflowX": "auto"},
+            style_cell={"textAlign": "left"},
+        ),
+        # Popup for advanced player info
+        html.Div(id="player-popup"),
+    ]
+)
 
-    # Table displaying soccer players stats
-    dash_table.DataTable(
-        id='table',
-        columns=[{"name": i, "id": i} for i in df.columns],
-        data=df.to_dict('records'),
-        row_selectable='single',  # Allow selecting only one row at a time
-        style_table={'overflowX': 'auto'},
-        style_cell={'textAlign': 'left'},
-    ),
-    
-    # Popup for advanced player info
-    html.Div(id='player-popup')
-])
 
 # Define callback to display player popup
 @app.callback(
-    [Output('player-popup', 'children'),
-     Output('player-popup', 'style')],
-    [Input('table', 'selected_rows'), 
-     Input('search-input', 'value')],
-    [State('table', 'data')]
+    [Output("player-popup", "children"), Output("player-popup", "style")],
+    [Input("table", "selected_rows"), Input("search-input", "value")],
+    [State("table", "data")],
 )
 def display_player_popup(selected_rows, search_value, data):
     filtered_data = data
     if search_value:
-        filtered_data = [row for row in filtered_data if search_value.lower() in str(row).lower()]
+        filtered_data = [
+            row for row in filtered_data if search_value.lower() in str(row).lower()
+        ]
 
     if selected_rows:
         selected_player = data[selected_rows[0]]
         return html.Div(
-            id='player-popup-content',
+            id="player-popup-content",
             children=[
-                html.H2(selected_player['person_name']),
+                html.H2(selected_player["person_name"]),
                 html.P(f"Age: {selected_player['age']}"),
                 html.P(f"Height: {selected_player['height']}"),
                 html.P(f"Weight: {selected_player['weight']}"),
                 html.P(f"Camp #: {selected_player['camp_number']}"),
                 html.P(f"Class: {selected_player['class_year']}"),
             ],
-            style={'border': 'thin lightgrey solid', 'padding': '10px'}
-        ), {'display': 'block'}
+            style={"border": "thin lightgrey solid", "padding": "10px"},
+        ), {"display": "block"}
     else:
-        return html.Div(), {'display': 'none'}
+        return html.Div(), {"display": "none"}
+
 
 # Run the app
-if __name__ == '__main__':
-    app.run_server(debug=True) # hot reloading enabled
+if __name__ == "__main__":
+    app.run_server(debug=True)  # hot reloading enabled
