@@ -1,80 +1,87 @@
 # Importing necessary libraries
 import dash
-import pandas as pd
 from dash import dcc, html, Input, Output, State, dash_table
+import dash_mantine_components as dmc
 
-# # Sample DataFrame of soccer players and stats
-# df = pd.DataFrame({
-#     "Name": ["Lionel Messi", "Cristiano Ronaldo", "Neymar Jr.", "Kylian Mbappé", "Robert Lewandowski",
-#              "Mohamed Salah", "Sadio Mané", "Harry Kane", "Kevin De Bruyne", "Luka Modric",
-#              "Sergio Ramos", "Virgil van Dijk", "Jan Oblak", "Alisson Becker", "Thiago Silva"],
-#     "Age": [34, 36, 29, 23, 33, 29, 29, 28, 30, 36, 35, 30, 28, 29, 37],
-#     "Nationality": ["Argentina", "Portugal", "Brazil", "France", "Poland",
-#                     "Egypt", "Senegal", "England", "Belgium", "Croatia",
-#                     "Spain", "Netherlands", "Slovenia", "Brazil", "Brazil"],
-#     "Club": ["Paris Saint-Germain", "Manchester United", "Paris Saint-Germain", "Paris Saint-Germain", "Bayern Munich",
-#              "Liverpool", "Liverpool", "Tottenham Hotspur", "Manchester City", "Real Madrid",
-#              "Paris Saint-Germain", "Liverpool", "Atlético Madrid", "Liverpool", "Chelsea"],
-#     "Goals": [32, 30, 20, 25, 28, 21, 18, 23, 15, 8, 5, 3, 0, 0, 2],
-#     "Assists": [10, 8, 12, 9, 5, 7, 10, 5, 20, 10, 1, 2, 0, 0, 1]
-# })
+import components
+from utils import create_df
 
-
-df = pd.read_csv("assets/data/camp_players_info.csv")
+# Load the data & format the df
+df = create_df()
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
 # Define the layout of the app
-app.layout = html.Div(
-    children=[
-        html.H1("INP Stats"),
-        # Search bar for filtering/sorting the table
-        dcc.Input(id="search-input", type="text", placeholder="Search..."),
-        # Table displaying soccer players stats
-        dash_table.DataTable(
-            id="table",
-            columns=[{"name": i, "id": i} for i in df.columns],
-            data=df.to_dict("records"),
-            row_selectable="single",  # Allow selecting only one row at a time
-            style_table={"overflowX": "auto"},
-            style_cell={"textAlign": "left"},
-        ),
-        # Popup for advanced player info
-        html.Div(id="player-popup"),
-    ]
+app.layout = dmc.MantineProvider(
+    html.Div(
+        children=[
+            components.header,
+            dmc.Container(
+                fluid=True,
+                children=[
+                    dmc.Title(
+                        "UIndy Camp Player Flexibility Results",
+                        order=1,
+                        align="center",
+                        color="#6c767a",
+                        weight="bold",
+                        p=15,
+                        style={"fontFamily": "ITC Franklin Gothic"},
+                    ),
+                    # Table displaying player stats
+                    dash_table.DataTable(
+                        id="table",
+                        columns=[
+                            {"name": i, "id": i}
+                            for i in df.columns
+                            if i not in ["S3 Bucket", "Overlay Video"]
+                        ],
+                        data=df.to_dict("records"),
+                        row_selectable="single",  # Allow selecting only one row at a time
+                        style_table={"overflowX": "auto"},
+                        style_cell={"textAlign": "center"},
+                    ),
+                    # Popup for advanced player info
+                    dmc.Modal(title="", id="player-popup", zIndex=10000, children=[], opened=False),
+                ],
+            ),
+            # TODO add footer
+        ]
+    )
 )
 
 
 # Define callback to display player popup
 @app.callback(
-    [Output("player-popup", "children"), Output("player-popup", "style")],
-    [Input("table", "selected_rows"), Input("search-input", "value")],
-    [State("table", "data")],
+    Output("player-popup", "opened"),
+    Output("player-popup", "title"),
+    Output("player-popup", "children"),
+    Input("table", "selected_rows"),
+    State("table", "data"),
+    State("player-popup", "opened"),
+    prevent_initial_call=True,
 )
-def display_player_popup(selected_rows, search_value, data):
-    filtered_data = data
-    if search_value:
-        filtered_data = [
-            row for row in filtered_data if search_value.lower() in str(row).lower()
-        ]
-
+def display_player_popup(selected_rows, data, opened):
     if selected_rows:
         selected_player = data[selected_rows[0]]
-        return html.Div(
+        player_name_title = (
+            f"{selected_player['First Name']} {selected_player['Last Name']}"
+        )
+        player_popup = html.Div(
             id="player-popup-content",
             children=[
-                html.H2(selected_player["person_name"]),
-                html.P(f"Age: {selected_player['age']}"),
-                html.P(f"Height: {selected_player['height']}"),
-                html.P(f"Weight: {selected_player['weight']}"),
-                html.P(f"Camp #: {selected_player['camp_number']}"),
-                html.P(f"Class: {selected_player['class_year']}"),
+                html.P(f"Age: {selected_player['Age']}"),
+                html.P(f"Height: {selected_player['Height']}"),
+                html.P(f"Weight: {selected_player['Weight']}"),
+                html.P(f"Camp #: {selected_player['Camp #']}"),
+                html.P(f"Class: {selected_player['Class']}"),
             ],
             style={"border": "thin lightgrey solid", "padding": "10px"},
-        ), {"display": "block"}
+        )
+        return not opened, player_name_title, player_popup
     else:
-        return html.Div(), {"display": "none"}
+        return not opened, "", html.Div()
 
 
 # Run the app
