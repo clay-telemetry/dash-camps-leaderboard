@@ -9,3 +9,8 @@ conda create -n dash-camp-leaderboard python=3.11 -y
 conda activate dash-camp-leaderboard
 pip install -r requirements.txt
 ```
+
+## Running the App
+```
+python main.py
+```
