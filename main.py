@@ -1,13 +1,10 @@
 # Importing necessary libraries
 import dash
-from dash import dcc, html, Input, Output, State, dash_table
+from dash import dcc, html, Input, Output, State, dash_table, callback
 import dash_mantine_components as dmc
 
 import components
-from utils import create_df
 
-# Load the data & format the df
-df = create_df()
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -30,20 +27,21 @@ app.layout = dmc.MantineProvider(
                         style={"fontFamily": "ITC Franklin Gothic"},
                     ),
                     # Table displaying player stats
-                    dash_table.DataTable(
-                        id="table",
-                        columns=[
-                            {"name": i, "id": i}
-                            for i in df.columns
-                            if i not in ["S3 Bucket", "Overlay Video"]
-                        ],
-                        data=df.to_dict("records"),
-                        row_selectable="single",  # Allow selecting only one row at a time
-                        style_table={"overflowX": "auto"},
-                        style_cell={"textAlign": "center"},
-                    ),
+                    components.grid,
+                    # dash_table.DataTable(
+                    #     id="table",
+                    #     columns=[
+                    #         {"name": i, "id": i}
+                    #         for i in df.columns
+                    #         if i not in ["S3 Bucket", "Overlay Video"]
+                    #     ],
+                    #     data=df.to_dict("records"),
+                    #     row_selectable="single",  # Allow selecting only one row at a time
+                    #     style_table={"overflowX": "auto"},
+                    #     style_cell={"textAlign": "center"},
+                    # ),
                     # Popup for advanced player info
-                    dmc.Modal(title="", id="player-popup", zIndex=10000, children=[], opened=False),
+                    components.popup,
                 ],
             ),
             # TODO add footer
@@ -52,36 +50,47 @@ app.layout = dmc.MantineProvider(
 )
 
 
-# Define callback to display player popup
-@app.callback(
-    Output("player-popup", "opened"),
-    Output("player-popup", "title"),
-    Output("player-popup", "children"),
+@callback(
+    Output("modal-centered", "opened"),
+    # Input("modal-centered-button", "n_clicks"),
     Input("table", "selected_rows"),
-    State("table", "data"),
-    State("player-popup", "opened"),
+    State("modal-centered", "opened"),
     prevent_initial_call=True,
 )
-def display_player_popup(selected_rows, data, opened):
-    if selected_rows:
-        selected_player = data[selected_rows[0]]
-        player_name_title = (
-            f"{selected_player['First Name']} {selected_player['Last Name']}"
-        )
-        player_popup = html.Div(
-            id="player-popup-content",
-            children=[
-                html.P(f"Age: {selected_player['Age']}"),
-                html.P(f"Height: {selected_player['Height']}"),
-                html.P(f"Weight: {selected_player['Weight']}"),
-                html.P(f"Camp #: {selected_player['Camp #']}"),
-                html.P(f"Class: {selected_player['Class']}"),
-            ],
-            style={"border": "thin lightgrey solid", "padding": "10px"},
-        )
-        return not opened, player_name_title, player_popup
-    else:
-        return not opened, "", html.Div()
+def toggle_modal(n_clicks, opened):
+    return not opened
+
+# Define callback to display player popup
+# @app.callback(
+#     Output("player-popup", "opened"),
+#     Output("player-popup", "title"),
+#     Output("player-popup", "children"),
+#     Input("table", "selected_rows"),
+#     State("table", "data"),
+#     State("player-popup", "opened"),
+#     prevent_initial_call=True,
+# )
+# def display_player_popup(selected_rows, data, opened):
+#     if selected_rows:
+#         selected_player = data[selected_rows[0]]
+#         player_name_title = (
+#             f"{selected_player['First Name']} {selected_player['Last Name']}"
+#         )
+#         player_popup = html.Div(
+#             id="player-popup-content",
+#             children=[
+#                 html.P(f"Age: {selected_player['Age']}"),
+#                 html.P(f"Height: {selected_player['Height']}"),
+#                 html.P(f"Weight: {selected_player['Weight']}"),
+#                 html.P(f"Camp #: {selected_player['Camp #']}"),
+#                 html.P(f"Class: {selected_player['Class']}"),
+#             ],
+#             style={"border": "thin lightgrey solid", "padding": "10px"},
+#         )
+#         return not opened, player_name_title, player_popup
+#     else:
+#         return not opened, "", html.Div()
+
 
 
 # Run the app
