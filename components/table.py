@@ -27,7 +27,8 @@ grid = DashMantineReactTable(
         columns=[{"accessorKey": i, "header": i} for i in df.columns],
         mrtProps={
             "enableHiding": False,
-            "rowSelect": "single",
+            "enableRowSelection": True,
+            "enableMultiRowSelection": False,
             "enableColumnFilters": True,
             "initialState": {"density": "sm"},
             "mantineTableProps": {"fontSize": "sm"},
