@@ -1,5 +1,4 @@
-
-from dash import dcc, html, Input, Output, State, dash_table
+from dash import html
 
 
 def set_grade(grade, scoreGrade):
@@ -12,7 +11,7 @@ def set_grade(grade, scoreGrade):
     background_color = "#000000"
     font_color = "#FFFFFF"
 
-    if (scoreGrade == "grade"):
+    if scoreGrade == "grade":
         if "A" in grade:
             background_color = "#1bcc67"
             font_color = "black"
@@ -28,9 +27,18 @@ def set_grade(grade, scoreGrade):
         elif "F" in grade:
             background_color = "#FF0000"
             font_color = "black"
-        
-        return html.H3(f"{grade}", style={"background-color": background_color, "color": font_color, "border-radius": "5px", "text-align": "center", "width": "30%"})
-    elif (scoreGrade == "score"):
+
+        return html.H3(
+            f"{grade}",
+            style={
+                "background-color": background_color,
+                "color": font_color,
+                "border-radius": "5px",
+                "text-align": "center",
+                "width": "30%",
+            },
+        )
+    elif scoreGrade == "score":
         if grade >= 80:
             background_color = "#1bcc67"
             font_color = "black"
@@ -46,9 +54,14 @@ def set_grade(grade, scoreGrade):
         elif grade < 20:
             background_color = "#FF0000"
             font_color = "black"
-        
-        return html.H3(f"{grade}", style={"background-color": background_color, "color": font_color, "border-radius": "5px", "text-align": "center", "width": "30%"})
 
-
-
-
+        return html.H3(
+            f"{grade}",
+            style={
+                "background-color": background_color,
+                "color": font_color,
+                "border-radius": "5px",
+                "text-align": "center",
+                "width": "30%",
+            },
+        )
