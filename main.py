@@ -48,12 +48,13 @@ app.layout = dmc.MantineProvider(
                             for i in df.columns if i != "S3 Bucket" and i != "Overlay Video"
                         ],
                         data=df.to_dict("records"),
-                        sort_action="native",
+                        sort_action="custom",
+                        sort_by=[],
                         filter_action="native",
                         sort_mode="multi",
                         page_size=100,
                         style_as_list_view=True,
-                        row_selectable="single",  # Allow selecting only one row at a time
+                        cell_selectable=True,
                         selected_rows=[],
                         style_table={"overflowX": "auto"},  # Horizontal scroll
                         style_filter={
@@ -67,14 +68,38 @@ app.layout = dmc.MantineProvider(
                         },  # Header styling
                         style_data_conditional=[
                             {
-                                'if': {'row_index': 'odd'},
-                                'backgroundColor': "#18639d25",
-                            }
+                                "if": {"column_id": "First Name"},
+                                "font-weight": "bold"
+                            },
+                            {
+                                "if": {"column_id": "Last Name"},
+                                "font-weight": "bold"
+                            },
+                            {
+                                "if": {"row_index": "odd"},
+                                "backgroundColor": "#18639d25",
+                            },
+                            {
+                                "if": {
+                                    "state": "active"  # 'active' | 'selected'
+                                },
+                                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                                "border": "1px solid rgb(0, 116, 217)",
+                            },
+                            {
+                                "if": {
+                                    "state": "selected"  # 'active' | 'selected'
+                                },
+                                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                                "border": "1px solid rgb(0, 116, 217)",
+                            },
+
                         ],  # Striped rows
                         style_data={
                             "whiteSpace": "normal",
                             "height": "auto",
                             "lineHeight": "50px",
+                            'minWidth': '150px', 'width': '150px', 'maxWidth': '150px',
                         },  # Row styling
                         style_cell={
                             "textAlign": "center",
@@ -93,18 +118,84 @@ app.layout = dmc.MantineProvider(
 )
 
 
-# Define callback to display player popup
+# custom sort
+@app.callback(
+    Output('table', "data", allow_duplicate=True),
+    Input('table', "sort_by"),
+    prevent_initial_call=True)
+def update_table(sort_by):
+    if len(sort_by):
+        dff = df.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sort_by
+            ],
+            inplace=False
+        )
+    else:
+        # No sort is applied
+        dff = df
+
+    return dff.to_dict('records')
+
+
+# Define callback to display player popup on cell click and highlight selected row
 @app.callback(
     Output("player-popup", "opened"),
+    Output("table", "style_data_conditional"),
     Output("player-popup", "children"),
-    Input("table", "selected_rows"),
+    Input("table", "selected_cells"),
+    Input("table", "active_cell"),
     State("table", "data"),
     State("player-popup", "opened"),
     prevent_initial_call=True,
 )
-def display_player_popup(selected_rows, data, opened):
-    if selected_rows:
-        selected_player = data[selected_rows[0]]
+def display_player_popup(selected_cells, active_cell, data, opened):
+
+    style = [
+        {
+            "if": {
+                "column_id": "First Name",
+            },
+            "font-weight": "bold",
+        },
+        {
+            "if": {
+                "column_id": "Last Name",
+            },
+            "font-weight": "bold",
+        },
+        {
+            "if": {"row_index": "odd"},
+            "backgroundColor": "#18639d25",
+        },
+        {
+            "if": {
+                "state": "active"  # 'active' | 'selected'
+            },
+            "backgroundColor": "rgba(0, 116, 217, 0.3)",
+            "border": "1px solid rgb(0, 116, 217)",
+        },
+        {
+            "if": {
+                "state": "selected"  # 'active' | 'selected'
+            },
+            "backgroundColor": "rgba(0, 116, 217, 0.3)",
+            "border": "1px solid rgb(0, 116, 217)",
+        },
+    ]
+    if active_cell != None:
+        style.append(
+            {
+                "if": {"row_index": active_cell["row"]},
+                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                "border": "1px solid rgb(0, 116, 217)",
+            },
+        )
+
+    if selected_cells and active_cell != None:
+        selected_player = data[selected_cells[0]['row']]
         first_name = selected_player["First Name"]
         last_name = selected_player["Last Name"]
         camp_num = selected_player["Camp #"]
@@ -145,7 +236,7 @@ def display_player_popup(selected_rows, data, opened):
                         style={"color": "#ffffff", "text-align": "center",
                                "width": "100%", "margin": "8px"},
                     ),
-                    html.P(
+                    html.H4(
                         f"#{camp_num} | YR: {class_year} | POS: {pos} | HT: {ht} | WT: {wt}",
                         style={"color": "#ffffff", "text-align": "center",
                                "width": "100%", "margin": "8px"},
@@ -160,6 +251,8 @@ def display_player_popup(selected_rows, data, opened):
                 "background-color": "#011627",
                 "display": "flex",
                 "flex-direction": "row",
+                "width": "65%",
+                "padding": "10px",
             },
         )
 
@@ -204,7 +297,7 @@ def display_player_popup(selected_rows, data, opened):
             spacing="5px",
             verticalSpacing="5px",
             children=[
-                html.Div(children=[html.H4("Back to Floor:")],
+                html.Div(children=[html.H3("Back to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(back_score, "score")],
@@ -214,7 +307,7 @@ def display_player_popup(selected_rows, data, opened):
                     children=[components.set_grade(back_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H4("Shin to Floor:")],
+                html.Div(children=[html.H3("Shin to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(shin_score, "score")],
@@ -224,7 +317,7 @@ def display_player_popup(selected_rows, data, opened):
                     children=[components.set_grade(shin_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H4("Thigh to Floor:")],
+                html.Div(children=[html.H3("Thigh to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(thigh_score, "score")],
@@ -248,7 +341,7 @@ def display_player_popup(selected_rows, data, opened):
                 # html.H2(f"Flexibility Grade: {flex_score}", style={"text-align": "center", "color": "#ffffff"}),
                 # player_grades_table,
                 dmc.Group(
-                    [html.H3("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
+                    [html.H2("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
                      components.set_grade(flex_score, "flex")], position="center"),
                 html.Div(
                     children=[player_scores_table],
@@ -292,13 +385,13 @@ def display_player_popup(selected_rows, data, opened):
                 "background-color": "#011627",
             },
         )
-        return not opened, player_popup
+        return not opened, style, player_popup
     else:
-        return not opened, html.Div()
+        return opened, style, html.Div()
 
 
 @app.callback(Output("table", "data"), [Input("search-input", "value")])
-def update_table(search_value):
+def update_table_search(search_value):
     if search_value:
         filtered_data = df[
             # df.apply(
