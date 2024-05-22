@@ -10,6 +10,7 @@ def set_grade(grade, scoreGrade):
     # Red FF0000 F
     background_color = "#000000"
     font_color = "#FFFFFF"
+    border_color = "#000000"
 
     if scoreGrade == "grade":
         if "A" in grade:
@@ -28,7 +29,7 @@ def set_grade(grade, scoreGrade):
             background_color = "#FF0000"
             font_color = "black"
 
-        return html.H3(
+        return html.H4(
             f"{grade}",
             style={
                 "background-color": background_color,
@@ -55,7 +56,7 @@ def set_grade(grade, scoreGrade):
             background_color = "#FF0000"
             font_color = "black"
 
-        return html.H3(
+        return html.H4(
             f"{grade}",
             style={
                 "background-color": background_color,
@@ -64,4 +65,27 @@ def set_grade(grade, scoreGrade):
                 "text-align": "center",
                 "width": "30%",
             },
+        )
+    elif scoreGrade == "flex":
+        if grade >= 80:
+            border_color = "#1bcc67"
+        elif grade >= 60:
+            border_color = "#a9fc7c"
+        elif grade >= 40:
+            border_color = "#FFEA00"
+        elif grade >= 20:
+            border_color = "#FFA500"
+        elif grade < 20:
+            border_color = "FF0000"
+
+        return html.H3(
+            f"{grade}",
+            style={
+                "border-color": border_color,
+                "border-style": "solid",
+                "border-radius": "5px",
+                "text-align": "center",
+                "color": "#ffffff",
+                "width": "25%",
+            }
         )

@@ -1,3 +1,4 @@
 dash
 pandas
 dash-mantine-components==0.12.1
+dash_iconify
