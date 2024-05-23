@@ -5,7 +5,7 @@ from dash import html
 player_popup = html.Div(
     children=[
         dmc.Modal(
-            title="test",
+            # title="test",
             id="player-popup",
             zIndex=10000,
             size="65%",

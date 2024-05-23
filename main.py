@@ -3,6 +3,7 @@ import dash
 from dash import dcc, html, Input, Output, State, dash_table
 import dash_mantine_components as dmc
 
+
 import components
 from utils import create_df
 
@@ -21,16 +22,23 @@ app.layout = dmc.MantineProvider(
                 fluid=True,
                 children=[
                     dmc.Title(
-                        "UIndy Camp Player Flexibility Results",
+                        "UINDY CAMP PLAYER FLEXIBILITY RESULTS",
                         order=1,
                         align="center",
-                        color="#6c767a",
+                        color="#1e2f3f",
                         weight="bold",
                         p=15,
-                        style={"fontFamily": "Calibri"},
+                        style={"fontFamily": "arial", "font-style": "italic"},
+                        td="underline",
                     ),
+                    html.Br(),
                     # Table displaying player stats
-                    dcc.Input(id="search-input", type="text", placeholder="Search..."),
+                    dmc.Group([
+                        dcc.Input(id="search-input", type="text", placeholder="Search by player name...", style={
+                            'width': '15%', 'textAlign': 'left', 'color': '#1e2f3f', 'lineHeight': '25px'}),
+                        dmc.Text(
+                            " * click on a player below to view squat video and scores *", color="green", style={"font-style": "italic"}, size="xl"),
+                    ]),
                     html.Br(),
                     dash_table.DataTable(
                         id="table",
@@ -40,24 +48,61 @@ app.layout = dmc.MantineProvider(
                                 if i in ["Age", "Height", "Weight", "Camp #"]
                                 else {"name": i, "id": i}
                             )
-                            for i in df.columns
+                            for i in df.columns if i != "S3 Bucket" and i != "Overlay Video"
                         ],
                         data=df.to_dict("records"),
-                        sort_action="native",
+                        sort_action="custom",
+                        sort_by=[],
                         filter_action="native",
                         sort_mode="multi",
                         page_size=100,
                         style_as_list_view=True,
-                        row_selectable="single",  # Allow selecting only one row at a time
+                        cell_selectable=True,
                         selected_rows=[],
                         style_table={"overflowX": "auto"},  # Horizontal scroll
+                        style_filter={
+                            "backgroundColor": "#18639d25", "lineHeight": "30px"},
                         style_header={
-                            "backgroundColor": "lightgrey",
+                            "backgroundColor": "#18639d",
                             "fontWeight": "bold",
+                            "color": "white",
+                            "lineHeight": "30px",
+
                         },  # Header styling
+                        style_data_conditional=[
+                            {
+                                "if": {"column_id": "First Name"},
+                                "font-weight": "bold"
+                            },
+                            {
+                                "if": {"column_id": "Last Name"},
+                                "font-weight": "bold"
+                            },
+                            {
+                                "if": {"row_index": "odd"},
+                                "backgroundColor": "#18639d25",
+                            },
+                            {
+                                "if": {
+                                    "state": "active"  # 'active' | 'selected'
+                                },
+                                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                                "border": "1px solid rgb(0, 116, 217)",
+                            },
+                            {
+                                "if": {
+                                    "state": "selected"  # 'active' | 'selected'
+                                },
+                                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                                "border": "1px solid rgb(0, 116, 217)",
+                            },
+
+                        ],  # Striped rows
                         style_data={
                             "whiteSpace": "normal",
                             "height": "auto",
+                            "lineHeight": "50px",
+                            'minWidth': '150px', 'width': '150px', 'maxWidth': '150px',
                         },  # Row styling
                         style_cell={
                             "textAlign": "center",
@@ -69,24 +114,91 @@ app.layout = dmc.MantineProvider(
                 ],
             ),
             # TODO add footer
+            html.Br(),
+            components.footer,
         ]
     )
 )
 
 
-# Define callback to display player popup
+# custom sort
+@app.callback(
+    Output('table', "data", allow_duplicate=True),
+    Input('table', "sort_by"),
+    prevent_initial_call=True)
+def update_table(sort_by):
+    if len(sort_by):
+        dff = df.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sort_by
+            ],
+            inplace=False
+        )
+    else:
+        # No sort is applied
+        dff = df
+
+    return dff.to_dict('records')
+
+
+# Define callback to display player popup on cell click and highlight selected row
 @app.callback(
     Output("player-popup", "opened"),
-    Output("player-popup", "title"),
+    Output("table", "style_data_conditional"),
     Output("player-popup", "children"),
-    Input("table", "selected_rows"),
+    Input("table", "selected_cells"),
+    Input("table", "active_cell"),
     State("table", "data"),
     State("player-popup", "opened"),
     prevent_initial_call=True,
 )
-def display_player_popup(selected_rows, data, opened):
-    if selected_rows:
-        selected_player = data[selected_rows[0]]
+def display_player_popup(selected_cells, active_cell, data, opened):
+
+    style = [
+        {
+            "if": {
+                "column_id": "First Name",
+            },
+            "font-weight": "bold",
+        },
+        {
+            "if": {
+                "column_id": "Last Name",
+            },
+            "font-weight": "bold",
+        },
+        {
+            "if": {"row_index": "odd"},
+            "backgroundColor": "#18639d25",
+        },
+        {
+            "if": {
+                "state": "active"  # 'active' | 'selected'
+            },
+            "backgroundColor": "rgba(0, 116, 217, 0.3)",
+            "border": "1px solid rgb(0, 116, 217)",
+        },
+        {
+            "if": {
+                "state": "selected"  # 'active' | 'selected'
+            },
+            "backgroundColor": "rgba(0, 116, 217, 0.3)",
+            "border": "1px solid rgb(0, 116, 217)",
+        },
+    ]
+    if active_cell != None:
+        style.append(
+            {
+                "if": {"row_index": active_cell["row"]},
+                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                "border": "1px solid rgb(0, 116, 217)",
+            },
+        )
+
+    if selected_cells and active_cell != None:
+        selected_player = data[selected_cells[0]['row']]
         first_name = selected_player["First Name"]
         last_name = selected_player["Last Name"]
         camp_num = selected_player["Camp #"]
@@ -95,6 +207,7 @@ def display_player_popup(selected_rows, data, opened):
         class_year = selected_player["Class"]
         ht = selected_player["Height"]
         wt = selected_player["Weight"]
+        pos = selected_player["Position"]
         flex_score = selected_player["Flexibility Score"]
         back_grade = selected_player["Back to Floor Grade"]
         shin_grade = selected_player["Shin to Floor Grade"]
@@ -120,22 +233,30 @@ def display_player_popup(selected_rows, data, opened):
         player_header = html.Div(
             id="player-popup-header",
             children=[
-                html.H1(
-                    f"{first_name} {last_name}",
-                    style={"color": "#ffffff", "width": "100%", "text-align": "center"},
-                ),
-                html.P(
-                    f"{camp_num} | {class_year} | HT: {ht} | WT: {wt}",
-                    style={"color": "#ffffff"},
-                ),
+                dmc.Group([
+                    dmc.Title(
+                        f"{first_name} {last_name}", td="underline",
+                        style={"color": "#ffffff", "text-align": "center",
+                               "width": "100%", "margin": "5px"},
+                    ),
+                    html.H1(
+                        f"#{camp_num} | YR: {class_year} | POS: {pos} | HT: {ht} | WT: {wt}",
+                        style={"color": "#ffffff", "text-align": "center",
+                               "width": "100%", "margin": "5px"},
+                    ),
+                ], align="center"),
             ],
             style={
-                "border": "1px solid yellow",
+                "border-style": "solid",
+                "border-color": "#18639d",
                 "font-family": "arial",
                 "font-color": "white",
                 "background-color": "#011627",
                 "display": "flex",
                 "flex-direction": "row",
+                "padding": "10px",
+                'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
+                'minHeight': '200px', 'height': '200px', 'maxHeight': '200px',
             },
         )
 
@@ -158,8 +279,8 @@ def display_player_popup(selected_rows, data, opened):
             "color": "#ffffff",
             "text-align": "center",
             # "border": "1px solid red",
-            "width": "100%",
-            "height": "50%",
+            "width": "150%",
+            "height": "100%",
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
@@ -167,8 +288,8 @@ def display_player_popup(selected_rows, data, opened):
         }
         score_styling = {
             # "border": "1px solid red",
-            "width": "100%",
-            "height": "50%",
+            "width": "150%",
+            "height": "100%",
             "display": "flex",
             "align-items": "center",
             "justify-content": "center",
@@ -180,7 +301,8 @@ def display_player_popup(selected_rows, data, opened):
             spacing="5px",
             verticalSpacing="5px",
             children=[
-                html.Div(children=[html.H3("Back to Floor:")], style=div_styling),
+                html.Div(children=[html.H2("Back to Floor:")],
+                         style=div_styling),
                 html.Div(
                     children=[components.set_grade(back_score, "score")],
                     style=score_styling,
@@ -189,7 +311,8 @@ def display_player_popup(selected_rows, data, opened):
                     children=[components.set_grade(back_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H3("Shin to Floor:")], style=div_styling),
+                html.Div(children=[html.H2("Shin to Floor:")],
+                         style=div_styling),
                 html.Div(
                     children=[components.set_grade(shin_score, "score")],
                     style=score_styling,
@@ -198,7 +321,8 @@ def display_player_popup(selected_rows, data, opened):
                     children=[components.set_grade(shin_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H3("Thigh to Floor:")], style=div_styling),
+                html.Div(children=[html.H2("Thigh to Floor:")],
+                         style=div_styling),
                 html.Div(
                     children=[components.set_grade(thigh_score, "score")],
                     style=score_styling,
@@ -209,11 +333,10 @@ def display_player_popup(selected_rows, data, opened):
                 ),
             ],
             style={
-                "background-color": "#1e2f3f",
                 "border-radius": "5px",
                 "font-family": "arial",
                 "box-shadow": "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-                "border": "1px solid red",
+                "align-items": "center",
             },
         )
 
@@ -222,36 +345,47 @@ def display_player_popup(selected_rows, data, opened):
             children=[
                 # html.H2(f"Flexibility Grade: {flex_score}", style={"text-align": "center", "color": "#ffffff"}),
                 # player_grades_table,
-                html.H2(
-                    f"Flexibility Score: {flex_score}",
-                    style={"text-align": "center", "color": "#ffffff"},
-                ),
+                dmc.Group(
+                    [html.H1("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
+                     components.set_grade(flex_score, "flex")], position="center"),
                 html.Div(
                     children=[player_scores_table],
-                    style={"padding-top": "10px", "border": "1px solid blue"},
                 ),
             ],
             style={
                 "padding": "10px",
-                "width": "60%",
                 "font-family": "arial",
                 "font-color": "white",
+                "border-style": "solid",
+                "border-color": "#18639d",
+                "background-color": "#011627",
+                'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
+                'minHeight': '320px', 'height': '320px', 'maxHeight': '320px',
+                "align-items": "center",
+                "justify-content": "center",
             },
         )
 
         player_popup = html.Div(
             id="player-popup-content",
             children=[
-                html.Video(
-                    controls=True,
-                    # height=500,
-                    width="40%",
-                    id="video_player",
-                    src=video,
-                    autoPlay=False,
-                    style={"margin-right": "8px"},
-                ),
-                player_scores_div,
+                dmc.Group(
+                    [
+                        html.Video(
+                            controls=True,
+                            # height=500,
+                            width="40%",
+                            id="video_player",
+                            src=video,
+                            autoPlay=False,
+                            style={"margin-right": "8px"},
+                        ),
+                        dmc.Stack([
+                            player_header,
+                            player_scores_div,
+                        ], align="center")
+                    ], position="center",
+                )
             ],
             style={
                 "padding": "10px",
@@ -260,18 +394,23 @@ def display_player_popup(selected_rows, data, opened):
                 "background-color": "#011627",
             },
         )
-        return not opened, player_header, player_popup
+        return not opened, style, player_popup
     else:
-        return not opened, "", html.Div()
+        return opened, style, html.Div()
 
 
 @app.callback(Output("table", "data"), [Input("search-input", "value")])
-def update_table(search_value):
+def update_table_search(search_value):
     if search_value:
         filtered_data = df[
+            # df.apply(
+            #     lambda row: search_value.lower() in " ".join(row.astype(str)).lower(),
+            #     axis=1,
+            # )
             df.apply(
-                lambda row: search_value.lower() in " ".join(row.astype(str)).lower(),
-                axis=1,
+                lambda row: search_value.lower() in row["First Name"].lower(
+                ) or search_value.lower() in row["Last Name"].lower(),
+                axis=1
             )
         ]
         return filtered_data.to_dict("records")
