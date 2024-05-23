@@ -33,9 +33,12 @@ app.layout = dmc.MantineProvider(
                     ),
                     html.Br(),
                     # Table displaying player stats
-                    dcc.Input(id="search-input", type="text", placeholder="Search by player name...", style={
-                        'width': '15%', 'textAlign': 'left', 'color': '#1e2f3f', 'lineHeight': '25px'}),
-                    html.Br(),
+                    dmc.Group([
+                        dcc.Input(id="search-input", type="text", placeholder="Search by player name...", style={
+                            'width': '15%', 'textAlign': 'left', 'color': '#1e2f3f', 'lineHeight': '25px'}),
+                        dmc.Text(
+                            " * click on a player below to view squat video and scores *", color="green", style={"font-style": "italic"}, size="xl"),
+                    ]),
                     html.Br(),
                     dash_table.DataTable(
                         id="table",
@@ -231,15 +234,15 @@ def display_player_popup(selected_cells, active_cell, data, opened):
             id="player-popup-header",
             children=[
                 dmc.Group([
-                    html.H2(
-                        f"{first_name} {last_name}",
+                    dmc.Title(
+                        f"{first_name} {last_name}", td="underline",
                         style={"color": "#ffffff", "text-align": "center",
-                               "width": "100%", "margin": "8px"},
+                               "width": "100%", "margin": "5px"},
                     ),
-                    html.H4(
+                    html.H1(
                         f"#{camp_num} | YR: {class_year} | POS: {pos} | HT: {ht} | WT: {wt}",
                         style={"color": "#ffffff", "text-align": "center",
-                               "width": "100%", "margin": "8px"},
+                               "width": "100%", "margin": "5px"},
                     ),
                 ], align="center"),
             ],
@@ -251,8 +254,9 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 "background-color": "#011627",
                 "display": "flex",
                 "flex-direction": "row",
-                "width": "65%",
                 "padding": "10px",
+                'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
+                'minHeight': '200px', 'height': '200px', 'maxHeight': '200px',
             },
         )
 
@@ -297,7 +301,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
             spacing="5px",
             verticalSpacing="5px",
             children=[
-                html.Div(children=[html.H3("Back to Floor:")],
+                html.Div(children=[html.H2("Back to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(back_score, "score")],
@@ -307,7 +311,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                     children=[components.set_grade(back_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H3("Shin to Floor:")],
+                html.Div(children=[html.H2("Shin to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(shin_score, "score")],
@@ -317,7 +321,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                     children=[components.set_grade(shin_grade, "grade")],
                     style=score_styling,
                 ),
-                html.Div(children=[html.H3("Thigh to Floor:")],
+                html.Div(children=[html.H2("Thigh to Floor:")],
                          style=div_styling),
                 html.Div(
                     children=[components.set_grade(thigh_score, "score")],
@@ -332,6 +336,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 "border-radius": "5px",
                 "font-family": "arial",
                 "box-shadow": "rgba(0, 0, 0, 0.1) 0px 4px 12px",
+                "align-items": "center",
             },
         )
 
@@ -341,7 +346,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 # html.H2(f"Flexibility Grade: {flex_score}", style={"text-align": "center", "color": "#ffffff"}),
                 # player_grades_table,
                 dmc.Group(
-                    [html.H2("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
+                    [html.H1("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
                      components.set_grade(flex_score, "flex")], position="center"),
                 html.Div(
                     children=[player_scores_table],
@@ -349,11 +354,15 @@ def display_player_popup(selected_cells, active_cell, data, opened):
             ],
             style={
                 "padding": "10px",
-                "width": "65%",
                 "font-family": "arial",
                 "font-color": "white",
                 "border-style": "solid",
                 "border-color": "#18639d",
+                "background-color": "#011627",
+                'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
+                'minHeight': '320px', 'height': '320px', 'maxHeight': '320px',
+                "align-items": "center",
+                "justify-content": "center",
             },
         )
 
@@ -375,7 +384,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                             player_header,
                             player_scores_div,
                         ], align="center")
-                    ], position="center"
+                    ], position="center",
                 )
             ],
             style={

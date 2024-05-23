@@ -29,7 +29,7 @@ def set_grade(grade, scoreGrade):
             background_color = "#FF0000"
             font_color = "black"
 
-        return html.H3(
+        return html.H2(
             f"{grade}",
             style={
                 "background-color": background_color,
@@ -56,7 +56,7 @@ def set_grade(grade, scoreGrade):
             background_color = "#FF0000"
             font_color = "black"
 
-        return html.H3(
+        return html.H2(
             f"{grade}",
             style={
                 "background-color": background_color,
@@ -78,7 +78,7 @@ def set_grade(grade, scoreGrade):
         elif grade < 20:
             border_color = "FF0000"
 
-        return html.H2(
+        return html.H1(
             f"{grade}",
             style={
                 "border-color": border_color,
