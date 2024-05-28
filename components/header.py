@@ -9,7 +9,7 @@ header = dmc.Header(
                     [
                         dmc.Anchor(
                             dmc.Image(
-                                src="assets/images/TS-Wordmark-RGB.svg",
+                                src="assets/images/TS-Wordmark-RGB-White.svg",
                             ),
                             href="https://telemetrysports.com/",
                         )
@@ -20,7 +20,7 @@ header = dmc.Header(
                     [
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("About", color="darkgrey"),
+                                dmc.Text("About", color="white"),
                                 href="https://telemetrysports.com/about",
                             ),
                             variant="outline",
@@ -29,7 +29,7 @@ header = dmc.Header(
                         ),
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("Pro", color="darkgrey"),
+                                dmc.Text("Pro", color="white"),
                                 href="https://telemetrysports.com/pro",
                             ),
                             variant="outline",
@@ -38,7 +38,7 @@ header = dmc.Header(
                         ),
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("College", color="darkgrey"),
+                                dmc.Text("College", color="white"),
                                 href="https://telemetrysports.com/college",
                             ),
                             variant="outline",
@@ -47,7 +47,7 @@ header = dmc.Header(
                         ),
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("Recruit", color="darkgrey"),
+                                dmc.Text("Recruit", color="white"),
                                 href="https://telemetrysports.com/recruit",
                             ),
                             variant="outline",
@@ -56,7 +56,7 @@ header = dmc.Header(
                         ),
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("Broadcast", color="darkgrey"),
+                                dmc.Text("Broadcast", color="white"),
                                 href="https://telemetrysports.com/broadcast",
                             ),
                             variant="outline",
@@ -65,7 +65,7 @@ header = dmc.Header(
                         ),
                         dmc.Button(
                             dmc.Anchor(
-                                dmc.Text("Contact Us", color="darkgrey"),
+                                dmc.Text("Contact Us", color="white"),
                                 href="https://telemetrysports.com/contact",
                             ),
                             variant="outline",
