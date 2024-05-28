@@ -7,6 +7,7 @@ from dash_iconify import DashIconify
 
 
 import components
+#from src.utils import create_df
 from utils import create_df
 
 # Load the data & format the df
@@ -20,6 +21,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
+server = app.server
 
 # authorization
 auth = dash_auth.BasicAuth(
@@ -385,7 +387,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 dmc.Stack([
                     dmc.Anchor(
                         dmc.Image(
-                            src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
+                            src="src/assets/images/TS-Horizontal-RGB-Inverse.svg"),
                         href="https://telemetrysports.com/",
                         style={'align-items': 'center',
                                'justify-content': 'center',

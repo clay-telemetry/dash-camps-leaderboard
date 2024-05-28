@@ -9,7 +9,7 @@ header = dmc.Header(
                     [
                         dmc.Anchor(
                             dmc.Image(
-                                src="assets/images/TS-Wordmark-RGB-White.svg",
+                                src="src/assets/images/TS-Wordmark-RGB-White.svg",
                             ),
                             href="https://telemetrysports.com/",
                         )
