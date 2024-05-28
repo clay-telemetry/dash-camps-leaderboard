@@ -2,6 +2,8 @@
 import dash
 from dash import dcc, html, Input, Output, State, dash_table
 import dash_mantine_components as dmc
+import dash_auth
+from dash_iconify import DashIconify
 
 
 import components
@@ -10,10 +12,21 @@ from utils import create_df
 # Load the data & format the df
 df = create_df()
 
+# usernames and passwords
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'hello': 'world',
+    'user': 'password'
+}
+
 # Initialize the Dash app
 app = dash.Dash(__name__)
 
-# Define the layout of the app
+# authorization
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
+
 app.layout = dmc.MantineProvider(
     html.Div(
         children=[
@@ -37,7 +50,7 @@ app.layout = dmc.MantineProvider(
                         dcc.Input(id="search-input", type="text", placeholder="Search by player name...", style={
                             'width': '15%', 'textAlign': 'left', 'color': '#1e2f3f', 'lineHeight': '25px'}),
                         dmc.Text(
-                            " * click on a player below to view squat video and scores *", color="green", style={"font-style": "italic"}, size="xl"),
+                            " * CLICK ON A PLAYER BELOW TO VIEW SQUAT VIDEO AND SCORES * ", color="green", style={"font-style": "italic"}, size="lg"),
                     ]),
                     html.Br(),
                     dash_table.DataTable(
@@ -122,7 +135,7 @@ app.layout = dmc.MantineProvider(
 
 
 # custom sort
-@app.callback(
+@ app.callback(
     Output('table', "data", allow_duplicate=True),
     Input('table', "sort_by"),
     prevent_initial_call=True)
@@ -237,7 +250,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                     dmc.Title(
                         f"{first_name} {last_name}", td="underline",
                         style={"color": "#ffffff", "text-align": "center",
-                               "width": "100%", "margin": "5px"},
+                               "width": "100%", "margin": "5px", "font-style": "italic"},
                     ),
                     html.H1(
                         f"#{camp_num} | YR: {class_year} | POS: {pos} | HT: {ht} | WT: {wt}",
@@ -360,9 +373,47 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 "border-color": "#18639d",
                 "background-color": "#011627",
                 'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
-                'minHeight': '320px', 'height': '320px', 'maxHeight': '320px',
+                'minHeight': '300px', 'height': '300px', 'maxHeight': '300px',
                 "align-items": "center",
                 "justify-content": "center",
+            },
+        )
+
+        logo_div = html.Div(
+            id="logo",
+            children=[
+                dmc.Stack([
+                    dmc.Anchor(
+                        dmc.Image(
+                            src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
+                        href="https://telemetrysports.com/",
+                        style={'align-items': 'center',
+                               'justify-content': 'center',
+                               # 'height': 'auto',
+                               'minHeight': '80px', 'height': '80px', 'maxHeight': '80px',
+                               'minWidth': '130px', 'width': '130px', 'maxWidth': '130px'
+                               }
+                    ),
+                    dmc.Button(
+                        dmc.Anchor(
+                            dmc.Text("Contact Us", color="white"),
+                            href="https://telemetrysports.com/contact",
+                        ),
+                        variant="outline",
+                        radius="sm",
+                        size="sm",
+                        style={"margin-top": "10px",
+                               "border-color": "white"}
+                    ),
+                ], align="center"
+                ),
+            ],
+            style={
+                'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
+                'minHeight': '160px', 'height': '160px', 'maxHeight': '160px',
+                "align-items": "center",
+                "justify-content": "center",
+                "padding": "10px",
             },
         )
 
@@ -383,9 +434,10 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                         dmc.Stack([
                             player_header,
                             player_scores_div,
-                        ], align="center")
+                            logo_div,
+                        ])
                     ], position="center",
-                )
+                ),
             ],
             style={
                 "padding": "10px",
@@ -399,7 +451,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
         return opened, style, html.Div()
 
 
-@app.callback(Output("table", "data"), [Input("search-input", "value")])
+@ app.callback(Output("table", "data"), [Input("search-input", "value")])
 def update_table_search(search_value):
     if search_value:
         filtered_data = df[
