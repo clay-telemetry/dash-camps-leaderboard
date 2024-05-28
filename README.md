@@ -11,6 +11,7 @@ pip install -r requirements.txt
 ```
 
 ## Running the App
+
 ```
-python main.py
+python src/app.py
 ```

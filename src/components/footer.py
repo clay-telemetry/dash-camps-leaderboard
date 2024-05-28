@@ -13,7 +13,7 @@ footer = dmc.Footer(
                         [
                             dmc.Anchor(
                                 dmc.Image(
-                                    src="assets/images/TS-Vertical-Main-RGB-Inverse.svg",
+                                    src="src/assets/images/TS-Vertical-Main-RGB-Inverse.svg",
                                 ),
                                 href="https://telemetrysports.com/",
                             ),
