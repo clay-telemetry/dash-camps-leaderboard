@@ -2,7 +2,9 @@ import pandas as pd
 
 
 def create_df():
-    df = pd.read_csv("src/assets/data/camp_players_info.csv")
+    #df = pd.read_csv("src/assets/data/camp_players_info.csv")
+    df = pd.read_csv(
+        "/Users/telemetry/dash-camps-leaderboard/src/assets/data/camp_players_info.csv")
     df = df[
         [
             "first_name",
