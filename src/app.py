@@ -7,7 +7,6 @@ from dash_iconify import DashIconify
 
 
 import components
-#from src.utils import create_df
 from utils import create_df
 
 # Load the data & format the df
@@ -387,7 +386,7 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                 dmc.Stack([
                     dmc.Anchor(
                         dmc.Image(
-                            src="src/assets/images/TS-Horizontal-RGB-Inverse.svg"),
+                            src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
                         href="https://telemetrysports.com/",
                         style={'align-items': 'center',
                                'justify-content': 'center',
