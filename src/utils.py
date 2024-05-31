@@ -1,10 +1,11 @@
 import pandas as pd
+import s3fs
 
 
 def create_df():
-    #df = pd.read_csv("src/assets/data/camp_players_info.csv")
     df = pd.read_csv(
-        "/Users/telemetry/dash-camps-leaderboard/src/assets/data/camp_players_info.csv")
+      # "src/assets/data/camp_players_info.csv")
+      "s3://scratch.telemetry.fm/ct/CampLeaderboard/camp_players_info.csv")
     df = df[
         [
             "first_name",
