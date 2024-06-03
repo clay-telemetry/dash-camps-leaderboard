@@ -6,3 +6,4 @@ dash-auth==2.3.0
 gunicorn
 dash-tools
 s3fs
+xlsxwriter
