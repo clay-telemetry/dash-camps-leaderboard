@@ -4,18 +4,23 @@ import s3fs
 
 def create_df():
     df = pd.read_csv(
-      # "src/assets/data/camp_players_info.csv")
-      "s3://scratch.telemetry.fm/ct/CampLeaderboard/camp_players_info.csv")
+        # "src/assets/data/camp_players_info.csv")
+        "s3://scratch.telemetry.fm/ct/CampLeaderboard/camp_players_info.csv")
+        # "src/assets/data/ts_office.csv")
+        # "src/assets/data/rotated_data.csv")
+        # "src/assets/data/EventRegistrationReport.csv", encoding="latin-1")
     df = df[
         [
             "first_name",
             "last_name",
-            "age",
             "height",
             "weight",
             "class_year",
+            "school",
+            "state",
             "camp_number",
             "position",
+            "flexibility_grade",
             "flexibility_score",
             "angles.shin_to_floor",
             "angles.thigh_to_floor",
@@ -34,12 +39,14 @@ def create_df():
         columns={
             "first_name": "First Name",
             "last_name": "Last Name",
-            "age": "Age",
             "height": "Height",
             "weight": "Weight",
             "class_year": "Class",
+            "school": "School",
+            "state": "State",
             "camp_number": "Camp #",
             "position": "Position",
+            "flexibility_grade": "Flexibility Grade",
             "flexibility_score": "Flexibility Score",
             "angles.shin_to_floor": "Shin to Floor Angle",
             "angles.thigh_to_floor": "Thigh to Floor Angle",

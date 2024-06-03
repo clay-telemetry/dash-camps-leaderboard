@@ -280,7 +280,15 @@ def sort(sort_by, tabledata):
 # export positions to excel function
 def export_to_excel(pos):
     writer = pd.ExcelWriter(f'{pos}_sheet.xlsx', engine='xlsxwriter')
-    filtered_df = df[df['Position'] == pos]
+    if pos == "DB":
+        filtered_df = df.loc[(df['Position'] == "CB") | (df['Position'] == "S")]
+    elif pos == "DL":
+        filtered_df = df.loc[(df["Position"] == "DE") | (df["Position"] == "DT")]
+    elif pos == "OL":
+        filtered_df = df.loc[(df["Position"] == "C") | (df["Position"] == "OG") | (df["Position"] == "OT")]
+    else:
+        filtered_df = df[df['Position'] == pos]
+
     filtered_df = filtered_df.drop(['S3 Bucket', 'Overlay Video'], axis=1)
     filtered_df.to_excel(writer, sheet_name=f'{pos}_Sheet')
     writer.close()
@@ -422,10 +430,13 @@ def display_player_popup(selected_cells, active_cell, data, opened):
         s3_bucket = selected_player["S3 Bucket"]
         overlay = selected_player["Overlay Video"]
         class_year = selected_player["Class"]
+        school = selected_player["School"]
+        state = selected_player["State"]
         ht = selected_player["Height"]
         wt = selected_player["Weight"]
         pos = selected_player["Position"]
         flex_score = selected_player["Flexibility Score"]
+        flex_grade = selected_player["Flexibility Grade"]
         back_grade = selected_player["Back to Floor Grade"]
         shin_grade = selected_player["Shin to Floor Grade"]
         thigh_grade = selected_player["Thigh to Floor Grade"]
@@ -442,12 +453,12 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                     dmc.Title(
                         f"{first_name} {last_name}", td="underline",
                         style={"color": "#ffffff", "text-align": "center",
-                               "width": "100%", "margin": "5px", "font-style": "italic"},
+                            "width": "100%", "margin": "5px", "font-style": "italic"},
                     ),
                     html.H2(
-                        f"#{camp_num} | YR: {class_year} | POS: {pos} | SCHOOL:  | STATE: ",
+                        f"#{camp_num} | YR: {class_year} | POS: {pos} | SCHOOL: {school} | STATE: {state} ",
                         style={"color": "#ffffff", "text-align": "center",
-                               "width": "100%", "margin": "5px"},
+                            "width": "100%", "margin": "5px"},
                     ),
                 ], align="center"),
             ],
@@ -533,8 +544,8 @@ def display_player_popup(selected_cells, active_cell, data, opened):
             id="player-scores",
             children=[
                 dmc.Group(
-                    [html.H1("Flexibility Score:", style={"text-align": "center", "color": "#ffffff"}),
-                     components.set_grade(flex_score, "flex")], position="center"),
+                    [html.H1("Flexibility Grade:", style={"text-align": "center", "color": "#ffffff"}),
+                    components.set_grade(flex_grade, "grade")], position="center"),
                 html.Div(
                     children=[player_scores_table],
                 ),
@@ -603,7 +614,9 @@ def display_player_popup(selected_cells, active_cell, data, opened):
                             src=video,
                             autoPlay=False,
                             style={"margin-right": "8px",
-                                   "border-radius": "5px"},
+                                   "border-radius": "5px",
+                                   "align-items": "center",
+                                   "justify-content": "center"},
                         ),
                         dmc.Stack([
                             player_header,
