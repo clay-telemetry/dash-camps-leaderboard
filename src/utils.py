@@ -5,7 +5,7 @@ import s3fs
 def create_df():
     df = pd.read_csv(
         # "src/assets/data/camp_players_info.csv")
-        "s3://scratch.telemetry.fm/ct/CampLeaderboard/camp_players_info.csv")
+        "s3://scratch.telemetry.fm/ct/CampLeaderboard/uindy_camp_players_info.csv")
         # "src/assets/data/ts_office.csv")
         # "src/assets/data/rotated_data.csv")
         # "src/assets/data/EventRegistrationReport.csv", encoding="latin-1")
@@ -61,4 +61,5 @@ def create_df():
             "overlay_video": "Overlay Video",
         }
     )
+    df["Position"].fillna(value="", inplace=True)
     return df
