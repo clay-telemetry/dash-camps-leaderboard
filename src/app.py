@@ -578,6 +578,8 @@ app.layout = dmc.MantineProvider(
                             sort_action="custom",
                             sort_by=[],
                             sort_mode="multi",
+                            #fixed_columns={'headers': True, 'data': 2},
+                            style_table={'minWidth': "100%"},
                             style_header={
                                 "backgroundColor": "#18639d",
                                 "fontWeight": "bold",
@@ -606,7 +608,7 @@ app.layout = dmc.MantineProvider(
                                 {
                                     "selector": ".dash-spreadsheet .Select:hover .Select-clear",
                                     "rule": "color: #1e2f3f"
-                                }
+                                },
                             ],
                         ),
                         dash_table.DataTable(
@@ -630,6 +632,9 @@ app.layout = dmc.MantineProvider(
                             style_as_list_view=True,
                             cell_selectable=True,
                             selected_rows=[],
+                            # fixed_columns={'headers': True, 'data': 2},
+                            # fixed_rows={'headers': True, 'data': 0},
+                            # style_table={'minWidth': "100%"},
                             style_filter={
                                 "backgroundColor": "#18639d25", "lineHeight": "30px"},
                             style_data_conditional=[
@@ -662,19 +667,23 @@ app.layout = dmc.MantineProvider(
 
                             ],  # Striped rows
                             style_data={
-                                "whiteSpace": "normal",
+                                #"whiteSpace": "normal",
                                 "height": "auto",
                                 "lineHeight": "50px",
                                 'minWidth': '170px', 'width': '170px', 'maxWidth': '170px',
+                                'overflow': 'hidden',
+                                'textOverflow': 'ellipsis',
                             },  # Row styling
                             style_cell={
                                 "textAlign": "center",
                                 "font-family": "arial",
                             },  # Cell alignment
+                            style_table={'minWidth': "100%"},
                             css=[{"selector": "tr:first-child",
-                                  "rule": "display: none", }, ],
+                                  "rule": "display: none", },
+                                  ],
                         )
-                    ], style={"overflowX": "auto"}),
+                    ], style={"overflowX": "auto", "maxHeight": "50000px", "height": "50000px", "minHeight": "50000px"}),
 
                     # Popup for advanced player info
                     components.player_popup,
