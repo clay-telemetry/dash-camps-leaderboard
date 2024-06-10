@@ -61,5 +61,5 @@ def create_df():
             "overlay_video": "Overlay Video",
         }
     )
-    df["Position"].fillna(value="", inplace=True)
+    df["Position"] = df["Position"].fillna(value="")
     return df
