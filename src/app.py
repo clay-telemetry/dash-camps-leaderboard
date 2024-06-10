@@ -499,7 +499,8 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 # Initialize the Dash app
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, update_title='Loading Players...')
+app.title = 'Telemetry UIndy Mega Camp'
 server = app.server
 
 # authorization
