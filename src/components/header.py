@@ -14,6 +14,7 @@ header = dmc.Header(
                         )
                     ],
                     position="left",
+                    style={'align-items': 'center', 'display': 'flex', 'width': '10vw'},
                 ),
                 dmc.Group(
                     [
@@ -24,7 +25,8 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '6vw'}
                         ),
                         dmc.Button(
                             dmc.Anchor(
@@ -33,7 +35,8 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '5vw'}
                         ),
                         dmc.Button(
                             dmc.Anchor(
@@ -42,7 +45,8 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '7vw'}
                         ),
                         dmc.Button(
                             dmc.Anchor(
@@ -51,7 +55,8 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '7vw'}
                         ),
                         dmc.Button(
                             dmc.Anchor(
@@ -60,7 +65,8 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '8vw'},
                         ),
                         dmc.Button(
                             dmc.Anchor(
@@ -69,10 +75,12 @@ header = dmc.Header(
                             ),
                             variant="outline",
                             radius="sm",
-                            size="md",
+                            size="sm",
+                            style={'width': '8vw'},
                         ),
                     ],
                     position="right",
+                    style={'display': 'flex', 'flex-direction': 'row', 'flex-wrap': 'wrap', 'width': '50vw'}
                     #spacing="xl",
                 ),
             ],
@@ -91,5 +99,6 @@ header = dmc.Header(
             "align-items": "center",  # Center the content vertically (top and bottom)
             "flex-direction": "row",
             "flex-wrap": "wrap",
+            "justify-content": "center",
     },
 )
