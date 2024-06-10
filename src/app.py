@@ -542,9 +542,15 @@ app.layout = dmc.MantineProvider(
                             position="flex-end",
                             style={"align-items": "flex-end",
                                    "justify-content": "flex-end",
-                                   "width": "55%"}
+                                   #"width": "55%",
+                                   "display": "flex",
+                                   "flex-wrap": "wrap"}
                         ),
-                    ]),
+                    ], 
+                        style={
+                            
+                        }
+                    ),
                     html.Br(),
                     html.Div([
                         # "table" with only headers and dropdowns
@@ -618,6 +624,8 @@ app.layout = dmc.MantineProvider(
                             sort_by=[],
                             sort_mode="multi",
                             page_size=100,
+                            page_current=0,
+                            page_action="custom",
                             style_as_list_view=True,
                             cell_selectable=True,
                             selected_rows=[],
@@ -717,11 +725,14 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, current_data):
 @app.callback(
     Output('table-data', 'data', allow_duplicate=True),
     Input('table-filter', 'sort_by'),
-    State('table-data', 'data'),
+    Input('table-data', "page_current"),
+    Input('table-data', "page_size"),
+   # State('table-data', 'data'),
     prevent_initial_call=True,
 )
-def sort(sort_by, tabledata):
-    data = pd.DataFrame(tabledata)
+def sort(sort_by, page_current, page_size):
+    #data = pd.DataFrame(tabledata)
+    data = df.copy()
     if len(sort_by):
         dff = data.sort_values(
             [col['column_id'] for col in sort_by],
@@ -734,21 +745,18 @@ def sort(sort_by, tabledata):
     else:
         dff = data
 
-    return dff.to_dict("records")
+    return dff.iloc[
+        page_current*page_size:(page_current+ 1)*page_size
+    ].to_dict('records')
+
+
+    #return dff.to_dict("records")
 
 
 # export positions to excel function
 def export_to_excel(pos):
     writer = pd.ExcelWriter(f'{pos}_sheet.xlsx', engine='xlsxwriter')
-    if pos == "DB":
-        filtered_df = df.loc[(df['Position'] == "CB") | (df['Position'] == "S")]
-    elif pos == "DL":
-        filtered_df = df.loc[(df["Position"] == "DE") | (df["Position"] == "DT")]
-    elif pos == "OL":
-        filtered_df = df.loc[(df["Position"] == "C") | (df["Position"] == "OG") | (df["Position"] == "OT")]
-    else:
-        filtered_df = df[df['Position'] == pos]
-
+    filtered_df = df[df['Position'] == pos]
     filtered_df = filtered_df.drop(['S3 Bucket', 'Overlay Video'], axis=1)
     filtered_df.to_excel(writer, sheet_name=f'{pos}_Sheet')
     writer.close()

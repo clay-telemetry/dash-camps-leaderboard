@@ -73,12 +73,23 @@ header = dmc.Header(
                         ),
                     ],
                     position="right",
-                    spacing="xl",
+                    #spacing="xl",
                 ),
             ],
             grow=True,
             p=10,
+            style={
+                "display": "flex",  # Use Flexbox layout
+                "width": "100%",  # Stretch container to 100% of the page width
+                "height": "100%",  # Stretch container to 100% of the page width
+                "flex-direction": "row",
+           },
         )
     ],
-    style={"backgroundColor": "#1e2f3f"},
+    style={"backgroundColor": "#1e2f3f",
+           "display": "flex",  # Use Flexbox layout
+            "align-items": "center",  # Center the content vertically (top and bottom)
+            "flex-direction": "row",
+            "flex-wrap": "wrap",
+    },
 )
