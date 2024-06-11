@@ -70,7 +70,6 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     "dbland1@niu.edu": "TelemetryRecruit1!",
     "bblaney@emich.edu": "TelemetryRecruit1!",
     "blantor2@miamoh.edu": "TelemetryRecruit1!",
-    "x": "TelemetryRecruit1!",
     "dbledsoe@defiamce.com": "TelemetryRecruit1!",
     "dbledsoe@defiance.edu": "TelemetryRecruit1!",
     "kjblocker1717@gmail.com": "TelemetryRecruit1!",
