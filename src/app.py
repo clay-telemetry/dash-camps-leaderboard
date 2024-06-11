@@ -715,12 +715,16 @@ app.layout = dmc.MantineProvider(
                                 "textAlign": "center",
                                 "font-family": "arial",
                             },  # Cell alignment
-                            style_table={'minWidth': "100%"},
+                            style_table={'minWidth': "100%", 'height': '100%'},
                             css=[{"selector": "tr:first-child",
                                   "rule": "display: none", },
+                                  {
+                                    "selector": ".previous-next-container .page-number .current-page-container input.current-page",
+                                    "rule": "font-family: arial" 
+                                  },
                                   ],
                         )
-                    ], style={"overflowX": "auto", "maxHeight": "50000px", "height": "50000px", "minHeight": "50000px"}),
+                    ], style={"overflowX": "auto", 'height': '100%'}),
 
                     # Popup for advanced player info
                     components.player_popup,
@@ -733,20 +737,36 @@ app.layout = dmc.MantineProvider(
 )
 
 
+@app.callback(
+        Output('table-data', 'data', allow_duplicate=True),
+        [Input('table-data', 'page_current'),
+         Input('table-data', 'data')],
+         prevent_initial_call=True,
+)
+def pagination(page_current, current_data):
+    if page_current == 0:
+        return current_data[page_current * 100: (page_current + 1) * 100]
+    else:
+        return dash.no_update
+
+
 # custom filtering with dropdowns and sorting
 @app.callback(
     Output("table-data", "data", allow_duplicate=True),
     [Input("table-filter", "data_timestamp"),
      Input('table-filter', 'sort_by'),
      Input('table-filter', 'data'),
+     Input('table-data', "page_current"),
      Input('table-data', 'data')],
     prevent_initial_call=True,
 )
-def update_table_dropdown_sort(timestamp, sort_by, filter_rows, current_data):
+def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, current_data):
     if timestamp is None:
         raise dash.exceptions.PreventUpdate
     data = df.copy()
     cols = data.columns
+    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5, "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
+    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-", 6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
 
     for col, value in filter_rows[0].items():
         # filtering
@@ -754,7 +774,9 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, current_data):
             data = data[data.astype(str)[col] == value]
         # sorting
         if len(sort_by):
-            dff = data.sort_values(
+            print(sort_by)
+            replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers, 'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
+            dff = replaced.sort_values(
                 [col['column_id'] for col in sort_by],
                 ascending=[
                     col['direction'] == 'asc'
@@ -762,26 +784,33 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, current_data):
                 ],
                 inplace=False
             )
+            dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades, 'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
         else:
             dff = data
 
-    return dff.to_dict("records")
+    #return dff.to_dict("records")
+    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict('records')
 
 
-# sort without filter callback
+#sort without filter callback
 @app.callback(
     Output('table-data', 'data', allow_duplicate=True),
     Input('table-filter', 'sort_by'),
     Input('table-data', "page_current"),
-    Input('table-data', "page_size"),
-   # State('table-data', 'data'),
+   # Input('table-data', "page_size"),
+    State('table-data', 'data'),
     prevent_initial_call=True,
 )
-def sort(sort_by, page_current, page_size):
-    #data = pd.DataFrame(tabledata)
+def sort(sort_by, page_current, tabledata):
+    # data = pd.DataFrame(tabledata)
     data = df.copy()
+    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5, "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
+    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-", 6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
+
     if len(sort_by):
-        dff = data.sort_values(
+        print(sort_by)
+        replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers, 'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
+        dff = replaced.sort_values(
             [col['column_id'] for col in sort_by],
             ascending=[
                 col['direction'] == 'asc'
@@ -789,15 +818,11 @@ def sort(sort_by, page_current, page_size):
             ],
             inplace=False
         )
+        dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades, 'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
     else:
         dff = data
 
-    return dff.iloc[
-        page_current*page_size:(page_current+ 1)*page_size
-    ].to_dict('records')
-
-
-    #return dff.to_dict("records")
+    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict('records')
 
 
 # export positions to excel function
@@ -890,11 +915,12 @@ def callback_WR(n):
     Output("player-popup", "children"),
     Input("table-data", "selected_cells"),
     Input("table-data", "active_cell"),
+    Input("table-data", "page_current"),
     State("table-data", "data"),
     State("player-popup", "opened"),
     prevent_initial_call=True,
 )
-def display_player_popup(selected_cells, active_cell, data, opened):
+def display_player_popup(selected_cells, active_cell, page_current, tabledata, opened):
 
     style = [
         {
@@ -928,6 +954,9 @@ def display_player_popup(selected_cells, active_cell, data, opened):
             "border": "1px solid rgb(0, 116, 217)",
         },
     ]
+
+    data = tabledata
+
     if active_cell != None:
         style.append(
             {
