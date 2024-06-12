@@ -533,8 +533,8 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     "grantzy@ucmail.uc.edu": "TelemetryRecruit1!",
     "price3st@ucmail.uc.edu": "TelemetryRecruit1!",
     "rbrosnan@uoregon.edu": "TelemetryRecruit1!",
-    "mikepariswalshmparis1@walsh.edu": "TelemetryRecruit1!",
-    "johnfankhauserwalshjfankhauser@walsh.edu": "TelemetryRecruit1!",
+    "mparis1@walsh.edu": "TelemetryRecruit1!",
+    "jfankhauser@walsh.edu": "TelemetryRecruit1!",
 }
 
 # Initialize the Dash app
