@@ -6,11 +6,12 @@ def create_df():
     df = pd.read_csv(
         # "src/assets/data/camp_players_info.csv")
         "s3://scratch.telemetry.fm/ct/CampLeaderboard/uindy_camp_players_info.csv")
-        # "src/assets/data/ts_office.csv")
-        # "src/assets/data/rotated_data.csv")
-        # "src/assets/data/EventRegistrationReport.csv", encoding="latin-1")
+    # "src/assets/data/ts_office.csv")
+    # "src/assets/data/rotated_data.csv")
+    # "src/assets/data/EventRegistrationReport.csv", encoding="latin-1")
     df = df[
         [
+            "camp_date",
             "first_name",
             "last_name",
             "height",
@@ -37,6 +38,7 @@ def create_df():
     ]
     df = df.rename(
         columns={
+            "camp_date": "Camp Year",
             "first_name": "First Name",
             "last_name": "Last Name",
             "height": "Height",
@@ -61,5 +63,6 @@ def create_df():
             "overlay_video": "Overlay Video",
         }
     )
+    df["Camp Year"] = pd.to_datetime(df["Camp Year"]).dt.year
     df["Position"] = df["Position"].fillna(value="")
     return df

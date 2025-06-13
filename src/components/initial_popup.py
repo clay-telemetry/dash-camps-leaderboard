@@ -43,35 +43,6 @@ initial_popup = html.Div(
                     dmc.Text(paragraph2, color="white", size="lg", ta="center", style={
                              "width": "85%", "ailgn-items": "center", "justify-content": "center"}),
                     html.Br(),
-                    dmc.Group([
-                        html.Video(
-                            src="https://s3.amazonaws.com/scratch.telemetry.fm/ar/telemetry-website/videos/ts-idaho-testimonial.mp4",
-                            width="50%",
-                            controls=True,
-                            autoPlay=False,
-                            style={
-                                "border-radius": "15px 15px 15px 15px",
-                            }),
-                        dmc.Stack([
-                            dmc.Title("Don't take our word for it...",
-                                      order=2, ta="center", color="#18639d", ),
-                            dmc.Text("Hear from Jason Eck Head Football Coach of the Idaho Vandals as he shares his experience with Telemetry Sports Recruit and how it has helped his program throughout the recruiting process.",
-                                     color="#011627", size="lg", ta="center", )
-                        ], align="center", style={"width": "45%"})
-                    ], position="center",
-                        style={
-                        "border-style": "solid",
-                        "border-color": "white",
-                        "border-radius": "15px 15px 15px 15px",
-                        "align-items": "center",
-                        "justify-content": "center",
-                        "padding": "10px",
-                        "display": "flex",
-                        "flex-direction": "row",
-                        "background-color": "white",
-                        "box-shadow": "3px 3px 5px grey"
-                    }),
-                    html.Br(),
                     dmc.Title("Contact Information", order=2,
                               ta="center", color="white"),
                     dmc.Divider(style={"width": 220},

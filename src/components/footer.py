@@ -42,17 +42,17 @@ footer = dmc.Footer(
                             dmc.Title("PRODUCTS", color="#18639d", order=3),
                             dmc.Anchor(
                                 dmc.Text("PRO", color="white", weight="bold"),
-                                href="https://telemetrysports.com/pro",
+                                href="https://telemetrysports.com/nfl/pro",
                             ),
                             dmc.Anchor(
                                 dmc.Text("COLLEGE", color="white",
                                          weight="bold"),
-                                href="https://telemetrysports.com/college",
+                                href="https://telemetrysports.com/cfb/college",
                             ),
                             dmc.Anchor(
                                 dmc.Text("RECRUIT", color="white",
                                          weight="bold"),
-                                href="https://telemetrysports.com/recruit",
+                                href="https://telemetrysports.com/cfb/recruit",
                             ),
                             dmc.Anchor(
                                 dmc.Text("BROADCAST", color="white",

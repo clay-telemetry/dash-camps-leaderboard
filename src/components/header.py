@@ -14,74 +14,75 @@ header = dmc.Header(
                         )
                     ],
                     position="left",
-                    style={'align-items': 'center', 'display': 'flex', 'width': '10vw'},
+                    style={'align-items': 'center',
+                           'display': 'flex', 'width': '10vw'},
                 ),
                 dmc.Group(
                     [
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("About", color="white"),
-                                href="https://telemetrysports.com/about",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '6vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '6vw'}
+                            href="https://telemetrysports.com/about",
                         ),
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("Pro", color="white"),
-                                href="https://telemetrysports.com/pro",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '5vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '5vw'}
+                            href="https://telemetrysports.com/nfl/pro",
                         ),
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("College", color="white"),
-                                href="https://telemetrysports.com/college",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '7vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '7vw'}
+                            href="https://telemetrysports.com/cfb/college",
                         ),
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("Recruit", color="white"),
-                                href="https://telemetrysports.com/recruit",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '7vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '7vw'}
+                            href="https://telemetrysports.com/cfb/recruit",
                         ),
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("Broadcast", color="white"),
-                                href="https://telemetrysports.com/broadcast",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '8vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '8vw'},
+                            href="https://telemetrysports.com/broadcast",
                         ),
-                        dmc.Button(
-                            dmc.Anchor(
+                        dmc.Anchor(
+                            dmc.Button(
                                 dmc.Text("Contact Us", color="white"),
-                                href="https://telemetrysports.com/contact",
+                                variant="outline",
+                                radius="sm",
+                                size="sm",
+                                style={'width': '8vw'}
                             ),
-                            variant="outline",
-                            radius="sm",
-                            size="sm",
-                            style={'width': '8vw'},
+                            href="https://telemetrysports.com/contact",
                         ),
                     ],
                     position="right",
-                    style={'display': 'flex', 'flex-direction': 'row', 'flex-wrap': 'wrap', 'width': '50vw'}
-                    #spacing="xl",
+                    style={'display': 'flex', 'flex-direction': 'row',
+                           'flex-wrap': 'wrap', 'width': '50vw'}
                 ),
             ],
             grow=True,
@@ -91,14 +92,15 @@ header = dmc.Header(
                 "width": "100%",  # Stretch container to 100% of the page width
                 "height": "100%",  # Stretch container to 100% of the page width
                 "flex-direction": "row",
-           },
+            },
         )
     ],
     style={"backgroundColor": "#1e2f3f",
            "display": "flex",  # Use Flexbox layout
-            "align-items": "center",  # Center the content vertically (top and bottom)
-            "flex-direction": "row",
-            "flex-wrap": "wrap",
-            "justify-content": "center",
-    },
+           # Center the content vertically (top and bottom)
+           "align-items": "center",
+           "flex-direction": "row",
+           "flex-wrap": "wrap",
+           "justify-content": "center",
+           },
 )
