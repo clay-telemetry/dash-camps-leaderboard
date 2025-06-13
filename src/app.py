@@ -49,11 +49,19 @@ def generate_position_buttons(pos):
                       style={"border-color": "#18639d"})
 
 
-def create_data_table(df_data, table_id, filter_id):
+def create_data_table(df_data, main_table_id, filter_table_id, df_filter):
+    # Define numeric columns
+    numeric_columns = ["Age", "Height", "Weight", "Camp #", "Flexibility Score",
+                       "Back to Floor Score", "Shin to Floor Score", "Thigh to Floor Score"]
+
+    # Create a single row of empty values for the filter table
+    filter_data = [{col: None for col in df_data.columns if col != "S3 Bucket" and col != "Overlay Video"
+                   and col != "Height" and col != "Weight"}]
+
     return html.Div([
-        # "table" with only headers and dropdowns
+        # Filter table with dropdowns
         dash_table.DataTable(
-            id=filter_id,
+            id=filter_table_id,  # This is the filter table with dropdowns
             columns=[
                 {"name": i, "id": i, "presentation": "dropdown"}
                 for i in df_filter.columns if i != "S3 Bucket" and i != "Overlay Video"
@@ -65,12 +73,15 @@ def create_data_table(df_data, table_id, filter_id):
             editable=True,
             dropdown={
                 col: {
+                    "clearable": True,
                     "options": [
                         {"label": str(i), "value": str(i)}
-                        for i in sorted(df_data[col].unique())
+                        for i in sorted(df_data[col].dropna().unique(),
+                                        key=lambda x: float(x) if col in numeric_columns and str(x).replace('.', '', 1).isdigit() else str(x))
                     ],
                 }
-                for col in df_data.columns if col == "Class" or col == "Position"
+                for col in df_data.columns if col != "S3 Bucket" and col != "Overlay Video"
+                and col != "Height" and col != "Weight"
             },
             sort_action="custom",
             sort_by=[],
@@ -107,8 +118,9 @@ def create_data_table(df_data, table_id, filter_id):
                 },
             ],
         ),
+        # Main data table
         dash_table.DataTable(
-            id=table_id,
+            id=main_table_id,  # This is the main table showing the data
             columns=[
                 (
                     {"name": i, "id": i, "type": "numeric"}
@@ -686,7 +698,8 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 # Initialize the Dash app
-app = dash.Dash(__name__, update_title='Loading Players...')
+app = dash.Dash(__name__, update_title='Loading Players...',
+                suppress_callback_exceptions=True)
 app.title = 'Telemetry UIndy Mega Camp'
 server = app.server
 
@@ -801,167 +814,120 @@ app.layout = dmc.MantineProvider(
 )
 def render_tab_content(tab):
     if tab == "2024":
-        return create_data_table(df_2024, "table-data-2024", "table-filter-2024")
+        return create_data_table(df_2024, "table-data", "table-filter", df_filter)
     else:
-        return create_data_table(df_2025, "table-data-2025", "table-filter-2025")
+        return create_data_table(df_2025, "table-data", "table-filter", df_filter)
 
 # Update the callbacks to handle both tables
 
 
 @app.callback(
-    Output("table-data-2024", "data", allow_duplicate=True),
-    Output("table-data-2025", "data", allow_duplicate=True),
-    [Input("search-input", "value")],
+    Output("table-data", "data", allow_duplicate=True),
+    [Input("search-input", "value"),
+     Input("year-tabs", "value")],
     prevent_initial_call=True
 )
-def update_table_search(search_value):
+def update_table_search(search_value, active_tab):
     if search_value:
-        filtered_data_2024 = df_2024[
-            df_2024.apply(
-                lambda row: search_value.lower() in row["First Name"].lower() or
-                search_value.lower() in row["Last Name"].lower(),
-                axis=1
-            )
-        ]
-        filtered_data_2025 = df_2025[
-            df_2025.apply(
-                lambda row: search_value.lower() in row["First Name"].lower() or
-                search_value.lower() in row["Last Name"].lower(),
-                axis=1
-            )
-        ]
-        return filtered_data_2024.to_dict("records"), filtered_data_2025.to_dict("records")
+        if active_tab == "2024":
+            filtered_data = df_2024[
+                df_2024.apply(
+                    lambda row: search_value.lower() in row["First Name"].lower() or
+                    search_value.lower() in row["Last Name"].lower(),
+                    axis=1
+                )
+            ]
+        else:
+            filtered_data = df_2025[
+                df_2025.apply(
+                    lambda row: search_value.lower() in row["First Name"].lower() or
+                    search_value.lower() in row["Last Name"].lower(),
+                    axis=1
+                )
+            ]
+        return filtered_data.to_dict("records")
     else:
-        return df_2024.to_dict("records"), df_2025.to_dict("records")
+        return df_2024.to_dict("records") if active_tab == "2024" else df_2025.to_dict("records")
 
-# Pagination callbacks
+# Pagination callback
 
 
 @app.callback(
-    Output('table-data-2024', 'data', allow_duplicate=True),
-    [Input('table-data-2024', 'page_current'),
-     Input('table-data-2024', 'data')],
+    Output('table-data', 'data', allow_duplicate=True),
+    [Input('table-data', 'page_current'),
+     Input('table-data', 'data')],
     prevent_initial_call=True,
 )
-def pagination_2024(page_current, current_data):
+def pagination(page_current, current_data):
     if page_current == 0:
         return current_data[page_current * 100: (page_current + 1) * 100]
     else:
         return dash.no_update
 
+# Filtering and sorting callback
+
 
 @app.callback(
-    Output('table-data-2025', 'data', allow_duplicate=True),
-    [Input('table-data-2025', 'page_current'),
-     Input('table-data-2025', 'data')],
+    Output("table-data", "data", allow_duplicate=True),
+    [Input("table-filter", "data_timestamp"),
+     Input('table-filter', 'sort_by'),
+     Input('table-filter', 'data'),
+     Input('table-data', "page_current"),
+     Input("year-tabs", "value")],
     prevent_initial_call=True,
 )
-def pagination_2025(page_current, current_data):
-    if page_current == 0:
-        return current_data[page_current * 100: (page_current + 1) * 100]
+def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, active_tab):
+    if timestamp is None or filter_rows is None:
+        raise dash.exceptions.PreventUpdate
+
+    data = df_2024.copy() if active_tab == "2024" else df_2025.copy()
+    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5,
+                         "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
+    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-",
+                         6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
+
+    # Apply filters
+    for col, value in filter_rows[0].items():
+        if value is not None and value != "":
+            # Convert both the filter value and the data to strings for comparison
+            data = data[data[col].astype(str) == str(value)]
+
+    # Apply sorting
+    if len(sort_by):
+        replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers,
+                                'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
+        dff = replaced.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[col['direction'] == 'asc' for col in sort_by],
+            inplace=False
+        )
+        dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades,
+                          'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
     else:
-        return dash.no_update
-
-# Filtering and sorting callbacks
-
-
-@app.callback(
-    Output("table-data-2024", "data", allow_duplicate=True),
-    [Input("table-filter-2024", "data_timestamp"),
-     Input('table-filter-2024', 'sort_by'),
-     Input('table-filter-2024', 'data'),
-     Input('table-data-2024', "page_current")],
-    prevent_initial_call=True,
-)
-def update_table_dropdown_sort_2024(timestamp, sort_by, filter_rows, page_current):
-    if timestamp is None:
-        raise dash.exceptions.PreventUpdate
-    data = df_2024.copy()
-    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5,
-                         "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
-    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-",
-                         6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
-
-    for col, value in filter_rows[0].items():
-        if value is not None:
-            data = data[data.astype(str)[col] == value]
-        if len(sort_by):
-            replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers,
-                                    'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
-            dff = replaced.sort_values(
-                [col['column_id'] for col in sort_by],
-                ascending=[col['direction'] == 'asc' for col in sort_by],
-                inplace=False
-            )
-            dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades,
-                              'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
-        else:
-            dff = data
+        dff = data
 
     return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict('records')
 
-
-@app.callback(
-    Output("table-data-2025", "data", allow_duplicate=True),
-    [Input("table-filter-2025", "data_timestamp"),
-     Input('table-filter-2025', 'sort_by'),
-     Input('table-filter-2025', 'data'),
-     Input('table-data-2025', "page_current")],
-    prevent_initial_call=True,
-)
-def update_table_dropdown_sort_2025(timestamp, sort_by, filter_rows, page_current):
-    if timestamp is None:
-        raise dash.exceptions.PreventUpdate
-    data = df_2025.copy()
-    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5,
-                         "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
-    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-",
-                         6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
-
-    for col, value in filter_rows[0].items():
-        if value is not None:
-            data = data[data.astype(str)[col] == value]
-        if len(sort_by):
-            replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers,
-                                    'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
-            dff = replaced.sort_values(
-                [col['column_id'] for col in sort_by],
-                ascending=[col['direction'] == 'asc' for col in sort_by],
-                inplace=False
-            )
-            dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades,
-                              'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
-        else:
-            dff = data
-
-    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict('records')
-
-# Player popup callbacks
+# Player popup callback
 
 
 @app.callback(
     Output("player-popup", "opened"),
-    Output("table-data-2024", "style_data_conditional", allow_duplicate=True),
-    Output("table-data-2025", "style_data_conditional", allow_duplicate=True),
+    Output("table-data", "style_data_conditional", allow_duplicate=True),
     Output("player-popup", "children"),
-    [Input("table-data-2024", "selected_cells"),
-     Input("table-data-2024", "active_cell"),
-     Input("table-data-2024", "page_current"),
-     Input("table-data-2025", "selected_cells"),
-     Input("table-data-2025", "active_cell"),
-     Input("table-data-2025", "page_current"),
+    [Input("table-data", "selected_cells"),
+     Input("table-data", "active_cell"),
+     Input("table-data", "page_current"),
      Input("year-tabs", "value")],
-    [State("table-data-2024", "data"),
-     State("table-data-2025", "data"),
+    [State("table-data", "data"),
      State("player-popup", "opened")],
     prevent_initial_call=True,
 )
-def display_player_popup(selected_cells_2024, active_cell_2024, page_current_2024,
-                         selected_cells_2025, active_cell_2025, page_current_2025,
-                         active_tab, data_2024, data_2025, opened):
+def display_player_popup(selected_cells, active_cell, page_current,
+                         active_tab, data, opened):
     ctx = dash.callback_context
     if not ctx.triggered:
-        return opened, [], [], html.Div()
+        return opened, [], html.Div()
 
     style = [
         {
@@ -988,31 +954,20 @@ def display_player_popup(selected_cells_2024, active_cell_2024, page_current_202
         },
     ]
 
-    if active_tab == "2024":
-        if active_cell_2024:
-            style.append({
-                "if": {"row_index": active_cell_2024["row"]},
-                "backgroundColor": "rgba(0, 116, 217, 0.3)",
-                "border": "1px solid rgb(0, 116, 217)",
-            })
-        if selected_cells_2024 and active_cell_2024:
-            selected_player = data_2024[selected_cells_2024[0]['row']]
-            return create_player_popup(selected_player, not opened, style, style, True)
-    else:
-        if active_cell_2025:
-            style.append({
-                "if": {"row_index": active_cell_2025["row"]},
-                "backgroundColor": "rgba(0, 116, 217, 0.3)",
-                "border": "1px solid rgb(0, 116, 217)",
-            })
-        if selected_cells_2025 and active_cell_2025:
-            selected_player = data_2025[selected_cells_2025[0]['row']]
-            return create_player_popup(selected_player, not opened, style, style, True)
+    if active_cell:
+        style.append({
+            "if": {"row_index": active_cell["row"]},
+            "backgroundColor": "rgba(0, 116, 217, 0.3)",
+            "border": "1px solid rgb(0, 116, 217)",
+        })
+    if selected_cells and active_cell:
+        selected_player = data[selected_cells[0]['row']]
+        return create_player_popup(selected_player, not opened, style, True)
 
-    return opened, style, style, html.Div()
+    return opened, style, html.Div()
 
 
-def create_player_popup(selected_player, opened_state, style_2024, style_2025, show_popup):
+def create_player_popup(selected_player, opened_state, style, show_popup):
     first_name = selected_player["First Name"]
     last_name = selected_player["Last Name"]
     camp_num = selected_player["Camp #"]
@@ -1220,7 +1175,7 @@ def create_player_popup(selected_player, opened_state, style_2024, style_2025, s
         },
     )
 
-    return opened_state, style_2024, style_2025, player_popup
+    return opened_state, style, player_popup
 
 # Export to Excel callbacks
 
