@@ -4,7 +4,7 @@ from dash_iconify import DashIconify
 
 
 paragraph1 = """
-    Telemetry Sports is a trusted advisor to over 40 NFL and NCAA® teams 
+    Telemetry Sports is a trusted advisor to over 50 NFL and NCAA® teams 
     providing quality sports data technology that produces efficient and 
     winning results. Known for swift and reliable response solutions—Telemetry 
     Sports offers organizations hands-on support built under their own unique 
@@ -12,11 +12,7 @@ paragraph1 = """
         """
 
 paragraph2 = """    
-    We aren't “one size fits all” in our approach. We understand your 
-    organization is unique with individual needs and goals. Telemetry Sports' 
-    one-stop-shop for quality sports data technology works as an essential extension
-    of your processes allowing more time for informed decision-making, practice 
-    planning, play and player performance evaluation, recruitment, and overall game preparation.
+    We’re thrilled to announce the acquisition of Telemetry Sports by Teamworks — expanding our capabilities to better serve the unique needs of college football programs.
         """
 
 
@@ -30,11 +26,19 @@ initial_popup = html.Div(
                 dmc.Stack([
                     dmc.Anchor(
                         dmc.Image(
-                            src="assets/images/TS-Wordmark-RGB-White.svg"
-                        ), align="center", href="https://telemetrysports.com", style={"width": "60%"}
+                            src="assets/images/teamworks-wordmark.svg",
+                            style={"width": "100%", "height": "100%",
+                                   "transform": "scale(1.8)"}
+                        ), align="center", href="https://teamworks.com"
                     ),
-                    dmc.Text("Changing the way data influences the sports experience",
-                             color="grey", size="lg", tt="uppercase", style={"font-style": "italic"}),
+                    dmc.Text("Formerly Known as...",
+                             color="grey", size="md", style={"font-style": "italic"}),
+                    dmc.Anchor(
+                        dmc.Image(
+                            src="assets/images/ts-Wordmark-RGB-White.svg",
+                            style={"width": "100%", "transform": "scale(0.9)"}
+                        ), align="center", href="https://telemetrysports.com"
+                    ),
                     html.Br(),
                     dmc.Title("WHO WE ARE", color="#18639d",
                               order=1, ta="center"),
