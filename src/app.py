@@ -7,189 +7,195 @@ from dash_iconify import DashIconify
 import pandas as pd
 
 
-import components
-from utils import create_df
+import src.components as components
+from src.utils import create_df
 
 # Load the data & format the df
 df = create_df()
 
 # Create filtered dataframes for each year
-df_2024 = df[df['Camp Year'] == 2024]
-df_2025 = df[df['Camp Year'] == 2025]
+df_2024 = df[df["Camp Year"] == 2024]
+df_2025 = df[df["Camp Year"] == 2025]
 
-df_filter = pd.DataFrame(
-    {
-        f'{i}': [None] for i in df.columns.values
-    }
-)
+df_filter = pd.DataFrame({f"{i}": [None] for i in df.columns.values})
 
 # Create separate filter dataframes for each year
-df_filter_2024 = pd.DataFrame(
-    {
-        f'{i}': [None] for i in df_2024.columns.values
-    }
-)
+df_filter_2024 = pd.DataFrame({f"{i}": [None] for i in df_2024.columns.values})
 
-df_filter_2025 = pd.DataFrame(
-    {
-        f'{i}': [None] for i in df_2025.columns.values
-    }
-)
+df_filter_2025 = pd.DataFrame({f"{i}": [None] for i in df_2025.columns.values})
 
 
 def generate_position_downloads(pos):
-    return (dcc.Download(id=f"download-{pos}-xlsx"))
+    return dcc.Download(id=f"download-{pos}-xlsx")
 
 
 def generate_position_buttons(pos):
-    return dmc.Button(children=[dmc.Text(f'{pos}', color="#18639d", style={"width": "5%"})],
-                      rightIcon=DashIconify(
-                          icon="material-symbols:download", color="#18639d",),
-                      id=f"button-export-{pos}", variant="outline",
-                      style={"border-color": "#18639d"})
+    return dmc.Button(
+        children=[dmc.Text(f"{pos}", color="#18639d", style={"width": "5%"})],
+        rightIcon=DashIconify(
+            icon="material-symbols:download",
+            color="#18639d",
+        ),
+        id=f"button-export-{pos}",
+        variant="outline",
+        style={"border-color": "#18639d"},
+    )
 
 
 def create_data_table(df_data, main_table_id, filter_table_id, df_filter):
     # Define numeric columns
-    numeric_columns = ["Age", "Height", "Weight", "Camp #", "Flexibility Score",
-                       "Back to Floor Score", "Shin to Floor Score", "Thigh to Floor Score"]
+    numeric_columns = [
+        "Age",
+        "Height",
+        "Weight",
+        "Camp #",
+        "Flexibility Score",
+        "Back to Floor Score",
+        "Shin to Floor Score",
+        "Thigh to Floor Score",
+    ]
 
     # Create a single row of empty values for the filter table
-    filter_data = [{col: None for col in df_data.columns if col != "S3 Bucket" and col != "Overlay Video"
-                   and col != "Height" and col != "Weight"}]
+    filter_data = [
+        {
+            col: None
+            for col in df_data.columns
+            if col != "S3 Bucket" and col != "Overlay Video" and col != "Height" and col != "Weight"
+        }
+    ]
 
-    return html.Div([
-        # Filter table with dropdowns
-        dash_table.DataTable(
-            id=filter_table_id,  # This is the filter table with dropdowns
-            columns=[
-                {"name": i, "id": i, "presentation": "dropdown"}
-                for i in df_filter.columns if i != "S3 Bucket" and i != "Overlay Video"
-                and i != "Height" and i != "Weight"
-            ],
-            data=df_filter.to_dict("records"),
-            cell_selectable=False,
-            style_as_list_view=True,
-            editable=True,
-            dropdown={
-                col: {
-                    "clearable": True,
-                    "options": [
-                        {"label": str(i), "value": str(i)}
-                        for i in sorted(df_data[col].dropna().unique(),
-                                        key=lambda x: float(x) if col in numeric_columns and str(x).replace('.', '', 1).isdigit() else str(x))
-                    ],
-                }
-                for col in df_data.columns if col != "S3 Bucket" and col != "Overlay Video"
-                and col != "Height" and col != "Weight"
-            },
-            sort_action="custom",
-            sort_by=[],
-            sort_mode="multi",
-            style_table={'minWidth': "100%"},
-            style_header={
-                "backgroundColor": "#18639d",
-                "fontWeight": "bold",
-                "font-family": "arial",
-                "color": "white",
-                "lineHeight": "30px",
-                'minWidth': '170px', 'width': '170px', 'maxWidth': '170px',
-                "textAlign": "center",
-            },
-            style_data={
-                "font-family": "arial",
-            },
-            css=[
-                {
-                    "selector": ".dash-spreadsheet .Select-option",
-                    "rule": "color: #1e2f3f",
+    return html.Div(
+        [
+            # Filter table with dropdowns
+            dash_table.DataTable(
+                id=filter_table_id,  # This is the filter table with dropdowns
+                columns=[
+                    {"name": i, "id": i, "presentation": "dropdown"}
+                    for i in df_filter.columns
+                    if i != "S3 Bucket" and i != "Overlay Video" and i != "Height" and i != "Weight"
+                ],
+                data=df_filter.to_dict("records"),
+                cell_selectable=False,
+                style_as_list_view=True,
+                editable=True,
+                dropdown={
+                    col: {
+                        "clearable": True,
+                        "options": [
+                            {"label": str(i), "value": str(i)}
+                            for i in sorted(
+                                df_data[col].dropna().unique(),
+                                key=lambda x: (
+                                    float(x)
+                                    if col in numeric_columns and str(x).replace(".", "", 1).isdigit()
+                                    else str(x)
+                                ),
+                            )
+                        ],
+                    }
+                    for col in df_data.columns
+                    if col != "S3 Bucket" and col != "Overlay Video" and col != "Height" and col != "Weight"
                 },
-                {
-                    "selector": ".dash-spreadsheet .Select-control:hover .Select-arrow",
-                    "rule": "border-top-color: #1e2f3f"
+                sort_action="custom",
+                sort_by=[],
+                sort_mode="multi",
+                style_table={"minWidth": "100%"},
+                style_header={
+                    "backgroundColor": "#18639d",
+                    "fontWeight": "bold",
+                    "font-family": "arial",
+                    "color": "white",
+                    "lineHeight": "30px",
+                    "minWidth": "170px",
+                    "width": "170px",
+                    "maxWidth": "170px",
+                    "textAlign": "center",
                 },
-                {
-                    "selector": ".dash-spreadsheet th:hover .column-header--sort",
-                    "rule": "color: #1e2f3f"
+                style_data={
+                    "font-family": "arial",
                 },
-                {
-                    "selector": ".dash-spreadsheet .Select:hover .Select-clear",
-                    "rule": "color: #1e2f3f"
-                },
-            ],
-        ),
-        # Main data table
-        dash_table.DataTable(
-            id=main_table_id,  # This is the main table showing the data
-            columns=[
-                (
-                    {"name": i, "id": i, "type": "numeric"}
-                    if i in ["Age", "Height", "Weight", "Camp #"]
-                    else {"name": i, "id": i}
-                )
-                for i in df_data.columns if i != "S3 Bucket" and i != "Overlay Video" and i != "Height" and i != "Weight"
-            ],
-            data=df_data.to_dict("records"),
-            sort_action="custom",
-            sort_by=[],
-            sort_mode="multi",
-            page_size=100,
-            page_current=0,
-            page_action="custom",
-            style_as_list_view=True,
-            cell_selectable=True,
-            selected_rows=[],
-            style_filter={
-                "backgroundColor": "#18639d25", "lineHeight": "30px"},
-            style_data_conditional=[
-                {
-                    "if": {"column_id": "First Name"},
-                    "font-weight": "bold"
-                },
-                {
-                    "if": {"column_id": "Last Name"},
-                    "font-weight": "bold"
-                },
-                {
-                    "if": {"row_index": "even"},
-                    "backgroundColor": "#18639d25",
-                },
-                {
-                    "if": {
-                        "state": "active"
+                css=[
+                    {
+                        "selector": ".dash-spreadsheet .Select-option",
+                        "rule": "color: #1e2f3f",
                     },
-                    "backgroundColor": "rgba(0, 116, 217, 0.3)",
-                    "border": "1px solid rgb(0, 116, 217)",
-                },
-                {
-                    "if": {
-                        "state": "selected"
+                    {
+                        "selector": ".dash-spreadsheet .Select-control:hover .Select-arrow",
+                        "rule": "border-top-color: #1e2f3f",
                     },
-                    "backgroundColor": "rgba(0, 116, 217, 0.3)",
-                    "border": "1px solid rgb(0, 116, 217)",
+                    {"selector": ".dash-spreadsheet th:hover .column-header--sort", "rule": "color: #1e2f3f"},
+                    {"selector": ".dash-spreadsheet .Select:hover .Select-clear", "rule": "color: #1e2f3f"},
+                ],
+            ),
+            # Main data table
+            dash_table.DataTable(
+                id=main_table_id,  # This is the main table showing the data
+                columns=[
+                    (
+                        {"name": i, "id": i, "type": "numeric"}
+                        if i in ["Age", "Height", "Weight", "Camp #"]
+                        else {"name": i, "id": i}
+                    )
+                    for i in df_data.columns
+                    if i != "S3 Bucket" and i != "Overlay Video" and i != "Height" and i != "Weight"
+                ],
+                data=df_data.to_dict("records"),
+                sort_action="custom",
+                sort_by=[],
+                sort_mode="multi",
+                page_size=100,
+                page_current=0,
+                page_action="custom",
+                style_as_list_view=True,
+                cell_selectable=True,
+                selected_rows=[],
+                style_filter={"backgroundColor": "#18639d25", "lineHeight": "30px"},
+                style_data_conditional=[
+                    {"if": {"column_id": "First Name"}, "font-weight": "bold"},
+                    {"if": {"column_id": "Last Name"}, "font-weight": "bold"},
+                    {
+                        "if": {"row_index": "even"},
+                        "backgroundColor": "#18639d25",
+                    },
+                    {
+                        "if": {"state": "active"},
+                        "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                        "border": "1px solid rgb(0, 116, 217)",
+                    },
+                    {
+                        "if": {"state": "selected"},
+                        "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                        "border": "1px solid rgb(0, 116, 217)",
+                    },
+                ],
+                style_data={
+                    "height": "auto",
+                    "lineHeight": "50px",
+                    "minWidth": "170px",
+                    "width": "170px",
+                    "maxWidth": "170px",
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
                 },
-            ],
-            style_data={
-                "height": "auto",
-                "lineHeight": "50px",
-                'minWidth': '170px', 'width': '170px', 'maxWidth': '170px',
-                'overflow': 'hidden',
-                'textOverflow': 'ellipsis',
-            },
-            style_cell={
-                "textAlign": "center",
-                "font-family": "arial",
-            },
-            style_table={'minWidth': "100%", 'height': '100%'},
-            css=[{"selector": "tr:first-child",
-                  "rule": "display: none", },
-                 {
-                "selector": ".previous-next-container .page-number .current-page-container input.current-page",
-                "rule": "font-family: arial"
-            },
-            ],
-        )
-    ], style={"overflowX": "auto", 'height': '100%'})
+                style_cell={
+                    "textAlign": "center",
+                    "font-family": "arial",
+                },
+                style_table={"minWidth": "100%", "height": "100%"},
+                css=[
+                    {
+                        "selector": "tr:first-child",
+                        "rule": "display: none",
+                    },
+                    {
+                        "selector": ".previous-next-container .page-number .current-page-container input.current-page",
+                        "rule": "font-family: arial",
+                    },
+                ],
+            ),
+        ],
+        style={"overflowX": "auto", "height": "100%"},
+    )
 
 
 # usernames and passwords
@@ -698,16 +704,12 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 # Initialize the Dash app
-app = dash.Dash(__name__, update_title='Loading Players...',
-                suppress_callback_exceptions=True)
-app.title = 'Telemetry UIndy Mega Camp'
+app = dash.Dash(__name__, update_title="Loading Players...", suppress_callback_exceptions=True)
+app.title = "Telemetry UIndy Mega Camp"
 server = app.server
 
 # authorization
-auth = dash_auth.BasicAuth(
-    app,
-    VALID_USERNAME_PASSWORD_PAIRS
-)
+auth = dash_auth.BasicAuth(app, VALID_USERNAME_PASSWORD_PAIRS)
 
 app.index_string = """<!DOCTYPE html>
 <html>
@@ -757,45 +759,58 @@ app.layout = dmc.MantineProvider(
                     ),
                     html.Br(),
                     # Table displaying player stats
-                    dmc.Group([
-                        dcc.Input(id="search-input", type="text", placeholder="Search by player name...", style={
-                            'width': '15%', 'textAlign': 'left', 'color': '#1e2f3f', 'lineHeight': '25px'}),
-                        dmc.Text(
-                            " * CLICK ON A PLAYER BELOW TO VIEW SQUAT VIDEO AND SCORES * ", color="green", style={
-                                "font-style": "italic"}, size="md"),
-                        dmc.Group(children=[i for i in (generate_position_downloads(i)
-                                                        for i in ['DB', 'DL', 'LB', 'OL', 'QB', 'RB', 'TE', 'WR'])],
-                                  ),
-                        dmc.Group(children=[i for i in (generate_position_buttons(
-                            i) for i in ['DB', 'DL', 'LB', 'OL', 'QB', 'RB', 'TE', 'WR'])],
-                            position="flex-end",
-                            style={"align-items": "flex-end",
-                                   "justify-content": "flex-end",
-                                   "display": "flex",
-                                   "flex-wrap": "wrap"}
-                        ),
-                    ]),
+                    dmc.Group(
+                        [
+                            dcc.Input(
+                                id="search-input",
+                                type="text",
+                                placeholder="Search by player name...",
+                                style={"width": "15%", "textAlign": "left", "color": "#1e2f3f", "lineHeight": "25px"},
+                            ),
+                            dmc.Text(
+                                " * CLICK ON A PLAYER BELOW TO VIEW SQUAT VIDEO AND SCORES * ",
+                                color="green",
+                                style={"font-style": "italic"},
+                                size="md",
+                            ),
+                            dmc.Group(
+                                children=[
+                                    i
+                                    for i in (
+                                        generate_position_downloads(i)
+                                        for i in ["DB", "DL", "LB", "OL", "QB", "RB", "TE", "WR"]
+                                    )
+                                ],
+                            ),
+                            dmc.Group(
+                                children=[
+                                    i
+                                    for i in (
+                                        generate_position_buttons(i)
+                                        for i in ["DB", "DL", "LB", "OL", "QB", "RB", "TE", "WR"]
+                                    )
+                                ],
+                                position="flex-end",
+                                style={
+                                    "align-items": "flex-end",
+                                    "justify-content": "flex-end",
+                                    "display": "flex",
+                                    "flex-wrap": "wrap",
+                                },
+                            ),
+                        ]
+                    ),
                     html.Br(),
                     dmc.Tabs(
                         [
-                            dmc.Tab(
-                                "2025 Players",
-                                value="2025",
-                                style={"font-family": "arial",
-                                       "color": "#1e2f3f"}
-                            ),
-                            dmc.Tab(
-                                "2024 Players",
-                                value="2024",
-                                style={"font-family": "arial",
-                                       "color": "#1e2f3f"}
-                            ),
+                            dmc.Tab("2025 Players", value="2025", style={"font-family": "arial", "color": "#1e2f3f"}),
+                            dmc.Tab("2024 Players", value="2024", style={"font-family": "arial", "color": "#1e2f3f"}),
                         ],
                         id="year-tabs",
                         value="2025",
                         color="#18639d",
                         variant="outline",
-                        style={"display": "flex"}
+                        style={"display": "flex"},
                     ),
                     html.Div(id="tab-content"),
                     components.player_popup,
@@ -818,62 +833,65 @@ def render_tab_content(tab):
     else:
         return create_data_table(df_2025, "table-data", "table-filter", df_filter)
 
+
 # Update the callbacks to handle both tables
 
 
 @app.callback(
     Output("table-data", "data", allow_duplicate=True),
-    [Input("search-input", "value"),
-     Input("year-tabs", "value")],
-    prevent_initial_call=True
+    [Input("search-input", "value"), Input("year-tabs", "value")],
+    prevent_initial_call=True,
 )
 def update_table_search(search_value, active_tab):
     if search_value:
         if active_tab == "2024":
             filtered_data = df_2024[
                 df_2024.apply(
-                    lambda row: search_value.lower() in row["First Name"].lower() or
-                    search_value.lower() in row["Last Name"].lower(),
-                    axis=1
+                    lambda row: search_value.lower() in row["First Name"].lower()
+                    or search_value.lower() in row["Last Name"].lower(),
+                    axis=1,
                 )
             ]
         else:
             filtered_data = df_2025[
                 df_2025.apply(
-                    lambda row: search_value.lower() in row["First Name"].lower() or
-                    search_value.lower() in row["Last Name"].lower(),
-                    axis=1
+                    lambda row: search_value.lower() in row["First Name"].lower()
+                    or search_value.lower() in row["Last Name"].lower(),
+                    axis=1,
                 )
             ]
         return filtered_data.to_dict("records")
     else:
         return df_2024.to_dict("records") if active_tab == "2024" else df_2025.to_dict("records")
 
+
 # Pagination callback
 
 
 @app.callback(
-    Output('table-data', 'data', allow_duplicate=True),
-    [Input('table-data', 'page_current'),
-     Input('table-data', 'data')],
+    Output("table-data", "data", allow_duplicate=True),
+    [Input("table-data", "page_current"), Input("table-data", "data")],
     prevent_initial_call=True,
 )
 def pagination(page_current, current_data):
     if page_current == 0:
-        return current_data[page_current * 100: (page_current + 1) * 100]
+        return current_data[page_current * 100 : (page_current + 1) * 100]
     else:
         return dash.no_update
+
 
 # Filtering and sorting callback
 
 
 @app.callback(
     Output("table-data", "data", allow_duplicate=True),
-    [Input("table-filter", "data_timestamp"),
-     Input('table-filter', 'sort_by'),
-     Input('table-filter', 'data'),
-     Input('table-data', "page_current"),
-     Input("year-tabs", "value")],
+    [
+        Input("table-filter", "data_timestamp"),
+        Input("table-filter", "sort_by"),
+        Input("table-filter", "data"),
+        Input("table-data", "page_current"),
+        Input("year-tabs", "value"),
+    ],
     prevent_initial_call=True,
 )
 def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, active_tab):
@@ -881,10 +899,36 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, ac
         raise dash.exceptions.PreventUpdate
 
     data = df_2024.copy() if active_tab == "2024" else df_2025.copy()
-    grades_to_numbers = {"A+": 0, "A": 1, "A-": 2, "B+": 3, "B": 4, "B-": 5,
-                         "C+": 6, "C": 7, "C-": 8, "D+": 9, "D": 10, "D-": 11, "F": 12}
-    numbers_to_grades = {0: "A+", 1: "A", 2: "A-", 3: "B+", 4: "B", 5: "B-",
-                         6: "C+", 7: "C", 8: "C-", 9: "D+", 10: "D", 11: "D-", 12: "F"}
+    grades_to_numbers = {
+        "A+": 0,
+        "A": 1,
+        "A-": 2,
+        "B+": 3,
+        "B": 4,
+        "B-": 5,
+        "C+": 6,
+        "C": 7,
+        "C-": 8,
+        "D+": 9,
+        "D": 10,
+        "D-": 11,
+        "F": 12,
+    }
+    numbers_to_grades = {
+        0: "A+",
+        1: "A",
+        2: "A-",
+        3: "B+",
+        4: "B",
+        5: "B-",
+        6: "C+",
+        7: "C",
+        8: "C-",
+        9: "D+",
+        10: "D",
+        11: "D-",
+        12: "F",
+    }
 
     # Apply filters
     for col, value in filter_rows[0].items():
@@ -894,19 +938,32 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, ac
 
     # Apply sorting
     if len(sort_by):
-        replaced = data.replace({'Flexibility Grade': grades_to_numbers, 'Shin to Floor Grade': grades_to_numbers,
-                                'Thigh to Floor Grade': grades_to_numbers, 'Back to Floor Grade': grades_to_numbers})
-        dff = replaced.sort_values(
-            [col['column_id'] for col in sort_by],
-            ascending=[col['direction'] == 'asc' for col in sort_by],
-            inplace=False
+        replaced = data.replace(
+            {
+                "Flexibility Grade": grades_to_numbers,
+                "Shin to Floor Grade": grades_to_numbers,
+                "Thigh to Floor Grade": grades_to_numbers,
+                "Back to Floor Grade": grades_to_numbers,
+            }
         )
-        dff = dff.replace({'Flexibility Grade': numbers_to_grades, 'Shin to Floor Grade': numbers_to_grades,
-                          'Thigh to Floor Grade': numbers_to_grades, 'Back to Floor Grade': numbers_to_grades})
+        dff = replaced.sort_values(
+            [col["column_id"] for col in sort_by],
+            ascending=[col["direction"] == "asc" for col in sort_by],
+            inplace=False,
+        )
+        dff = dff.replace(
+            {
+                "Flexibility Grade": numbers_to_grades,
+                "Shin to Floor Grade": numbers_to_grades,
+                "Thigh to Floor Grade": numbers_to_grades,
+                "Back to Floor Grade": numbers_to_grades,
+            }
+        )
     else:
         dff = data
 
-    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict('records')
+    return dff.iloc[page_current * 100 : (page_current + 1) * 100].to_dict("records")
+
 
 # Player popup callback
 
@@ -915,16 +972,16 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, ac
     Output("player-popup", "opened"),
     Output("table-data", "style_data_conditional", allow_duplicate=True),
     Output("player-popup", "children"),
-    [Input("table-data", "selected_cells"),
-     Input("table-data", "active_cell"),
-     Input("table-data", "page_current"),
-     Input("year-tabs", "value")],
-    [State("table-data", "data"),
-     State("player-popup", "opened")],
+    [
+        Input("table-data", "selected_cells"),
+        Input("table-data", "active_cell"),
+        Input("table-data", "page_current"),
+        Input("year-tabs", "value"),
+    ],
+    [State("table-data", "data"), State("player-popup", "opened")],
     prevent_initial_call=True,
 )
-def display_player_popup(selected_cells, active_cell, page_current,
-                         active_tab, data, opened):
+def display_player_popup(selected_cells, active_cell, page_current, active_tab, data, opened):
     ctx = dash.callback_context
     if not ctx.triggered:
         return opened, [], html.Div()
@@ -955,13 +1012,15 @@ def display_player_popup(selected_cells, active_cell, page_current,
     ]
 
     if active_cell:
-        style.append({
-            "if": {"row_index": active_cell["row"]},
-            "backgroundColor": "rgba(0, 116, 217, 0.3)",
-            "border": "1px solid rgb(0, 116, 217)",
-        })
+        style.append(
+            {
+                "if": {"row_index": active_cell["row"]},
+                "backgroundColor": "rgba(0, 116, 217, 0.3)",
+                "border": "1px solid rgb(0, 116, 217)",
+            }
+        )
     if selected_cells and active_cell:
-        selected_player = data[selected_cells[0]['row']]
+        selected_player = data[selected_cells[0]["row"]]
         return create_player_popup(selected_player, not opened, style, True)
 
     return opened, style, html.Div()
@@ -990,18 +1049,26 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
     player_header = html.Div(
         id="player-popup-header",
         children=[
-            dmc.Group([
-                dmc.Title(
-                    f"{first_name} {last_name}", td="underline",
-                    style={"color": "#ffffff", "text-align": "center",
-                           "width": "100%", "margin": "5px", "font-style": "italic"},
-                ),
-                html.H2(
-                    f"#{camp_num} | YR: {class_year} | POS: {pos} | SCHOOL: {school} | STATE: {state} ",
-                    style={"color": "#ffffff", "text-align": "center",
-                           "width": "100%", "margin": "5px"},
-                ),
-            ], align="center"),
+            dmc.Group(
+                [
+                    dmc.Title(
+                        f"{first_name} {last_name}",
+                        td="underline",
+                        style={
+                            "color": "#ffffff",
+                            "text-align": "center",
+                            "width": "100%",
+                            "margin": "5px",
+                            "font-style": "italic",
+                        },
+                    ),
+                    html.H2(
+                        f"#{camp_num} | YR: {class_year} | POS: {pos} | SCHOOL: {school} | STATE: {state} ",
+                        style={"color": "#ffffff", "text-align": "center", "width": "100%", "margin": "5px"},
+                    ),
+                ],
+                align="center",
+            ),
         ],
         style={
             "border-style": "solid",
@@ -1012,9 +1079,13 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
             "display": "flex",
             "flex-direction": "row",
             "padding": "10px",
-            'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
-            'minHeight': '200px', 'height': '200px', 'maxHeight': '200px',
-            "border-radius": "5px"
+            "minWidth": "400px",
+            "width": "400px",
+            "maxWidth": "400px",
+            "minHeight": "200px",
+            "height": "200px",
+            "maxHeight": "200px",
+            "border-radius": "5px",
         },
     )
 
@@ -1042,8 +1113,7 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
         spacing="5px",
         verticalSpacing="5px",
         children=[
-            html.Div(children=[html.H2("Back to Floor:")],
-                     style=div_styling),
+            html.Div(children=[html.H2("Back to Floor:")], style=div_styling),
             html.Div(
                 children=[components.set_grade(back_score, "score")],
                 style=score_styling,
@@ -1052,8 +1122,7 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
                 children=[components.set_grade(back_grade, "grade")],
                 style=score_styling,
             ),
-            html.Div(children=[html.H2("Shin to Floor:")],
-                     style=div_styling),
+            html.Div(children=[html.H2("Shin to Floor:")], style=div_styling),
             html.Div(
                 children=[components.set_grade(shin_score, "score")],
                 style=score_styling,
@@ -1062,8 +1131,7 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
                 children=[components.set_grade(shin_grade, "grade")],
                 style=score_styling,
             ),
-            html.Div(children=[html.H2("Thigh to Floor:")],
-                     style=div_styling),
+            html.Div(children=[html.H2("Thigh to Floor:")], style=div_styling),
             html.Div(
                 children=[components.set_grade(thigh_score, "score")],
                 style=score_styling,
@@ -1085,8 +1153,12 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
         id="player-scores",
         children=[
             dmc.Group(
-                [html.H1("Flexibility Grade:", style={"text-align": "center", "color": "#ffffff"}),
-                 components.set_grade(flex_grade, "grade")], position="center"),
+                [
+                    html.H1("Flexibility Grade:", style={"text-align": "center", "color": "#ffffff"}),
+                    components.set_grade(flex_grade, "grade"),
+                ],
+                position="center",
+            ),
             html.Div(
                 children=[player_scores_table],
             ),
@@ -1098,45 +1170,58 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
             "border-style": "solid",
             "border-color": "#18639d",
             "background-color": "#011627",
-            'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
-            'minHeight': '300px', 'height': '300px', 'maxHeight': '300px',
+            "minWidth": "400px",
+            "width": "400px",
+            "maxWidth": "400px",
+            "minHeight": "300px",
+            "height": "300px",
+            "maxHeight": "300px",
             "align-items": "center",
             "justify-content": "center",
-            "border-radius": "5px"
+            "border-radius": "5px",
         },
     )
 
     logo_div = html.Div(
         id="logo",
         children=[
-            dmc.Stack([
-                dmc.Anchor(
-                    dmc.Image(
-                        src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
-                    href="https://telemetrysports.com/",
-                    style={'align-items': 'center',
-                           'justify-content': 'center',
-                           'minHeight': '80px', 'height': '80px', 'maxHeight': '80px',
-                           'minWidth': '130px', 'width': '130px', 'maxWidth': '130px'
-                           }
-                ),
-                dmc.Button(
+            dmc.Stack(
+                [
                     dmc.Anchor(
-                        dmc.Text("Contact Us", color="white"),
-                        href="https://telemetrysports.com/contact",
+                        dmc.Image(src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
+                        href="https://telemetrysports.com/",
+                        style={
+                            "align-items": "center",
+                            "justify-content": "center",
+                            "minHeight": "80px",
+                            "height": "80px",
+                            "maxHeight": "80px",
+                            "minWidth": "130px",
+                            "width": "130px",
+                            "maxWidth": "130px",
+                        },
                     ),
-                    variant="outline",
-                    radius="sm",
-                    size="sm",
-                    style={"margin-top": "10px",
-                           "border-color": "white"}
-                ),
-            ], align="center"
+                    dmc.Button(
+                        dmc.Anchor(
+                            dmc.Text("Contact Us", color="white"),
+                            href="https://telemetrysports.com/contact",
+                        ),
+                        variant="outline",
+                        radius="sm",
+                        size="sm",
+                        style={"margin-top": "10px", "border-color": "white"},
+                    ),
+                ],
+                align="center",
             ),
         ],
         style={
-            'minWidth': '400px', 'width': '400px', 'maxWidth': '400px',
-            'minHeight': '160px', 'height': '160px', 'maxHeight': '160px',
+            "minWidth": "400px",
+            "width": "400px",
+            "maxWidth": "400px",
+            "minHeight": "160px",
+            "height": "160px",
+            "maxHeight": "160px",
             "align-items": "center",
             "justify-content": "center",
             "padding": "10px",
@@ -1154,17 +1239,22 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
                         id="video_player",
                         src=video,
                         autoPlay=False,
-                        style={"margin-right": "8px",
-                               "border-radius": "5px",
-                               "align-items": "center",
-                               "justify-content": "center"},
+                        style={
+                            "margin-right": "8px",
+                            "border-radius": "5px",
+                            "align-items": "center",
+                            "justify-content": "center",
+                        },
                     ),
-                    dmc.Stack([
-                        player_header,
-                        player_scores_div,
-                        logo_div,
-                    ])
-                ], position="center",
+                    dmc.Stack(
+                        [
+                            player_header,
+                            player_scores_div,
+                            logo_div,
+                        ]
+                    ),
+                ],
+                position="center",
             ),
         ],
         style={
@@ -1177,14 +1267,15 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
 
     return opened_state, style, player_popup
 
+
 # Export to Excel callbacks
 
 
 @app.callback(
-    Output('download-DB-xlsx', 'data'),
-    Input('button-export-DB', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-DB-xlsx", "data"),
+    Input("button-export-DB", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_DB(n, active_tab):
     if active_tab == "2024":
@@ -1194,10 +1285,10 @@ def callback_DB(n, active_tab):
 
 
 @app.callback(
-    Output('download-DL-xlsx', 'data'),
-    Input('button-export-DL', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-DL-xlsx", "data"),
+    Input("button-export-DL", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_DL(n, active_tab):
     if active_tab == "2024":
@@ -1207,10 +1298,10 @@ def callback_DL(n, active_tab):
 
 
 @app.callback(
-    Output('download-LB-xlsx', 'data'),
-    Input('button-export-LB', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-LB-xlsx", "data"),
+    Input("button-export-LB", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_LB(n, active_tab):
     if active_tab == "2024":
@@ -1220,10 +1311,10 @@ def callback_LB(n, active_tab):
 
 
 @app.callback(
-    Output('download-OL-xlsx', 'data'),
-    Input('button-export-OL', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-OL-xlsx", "data"),
+    Input("button-export-OL", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_OL(n, active_tab):
     if active_tab == "2024":
@@ -1233,10 +1324,10 @@ def callback_OL(n, active_tab):
 
 
 @app.callback(
-    Output('download-QB-xlsx', 'data'),
-    Input('button-export-QB', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-QB-xlsx", "data"),
+    Input("button-export-QB", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_QB(n, active_tab):
     if active_tab == "2024":
@@ -1246,10 +1337,10 @@ def callback_QB(n, active_tab):
 
 
 @app.callback(
-    Output('download-RB-xlsx', 'data'),
-    Input('button-export-RB', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-RB-xlsx", "data"),
+    Input("button-export-RB", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_RB(n, active_tab):
     if active_tab == "2024":
@@ -1259,10 +1350,10 @@ def callback_RB(n, active_tab):
 
 
 @app.callback(
-    Output('download-TE-xlsx', 'data'),
-    Input('button-export-TE', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-TE-xlsx", "data"),
+    Input("button-export-TE", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_TE(n, active_tab):
     if active_tab == "2024":
@@ -1272,10 +1363,10 @@ def callback_TE(n, active_tab):
 
 
 @app.callback(
-    Output('download-WR-xlsx', 'data'),
-    Input('button-export-WR', 'n_clicks'),
-    Input('year-tabs', 'value'),
-    prevent_initial_call=True
+    Output("download-WR-xlsx", "data"),
+    Input("button-export-WR", "n_clicks"),
+    Input("year-tabs", "value"),
+    prevent_initial_call=True,
 )
 def callback_WR(n, active_tab):
     if active_tab == "2024":
@@ -1285,14 +1376,14 @@ def callback_WR(n, active_tab):
 
 
 def export_to_excel(pos, df_data):
-    writer = pd.ExcelWriter(f'{pos}_sheet.xlsx', engine='xlsxwriter')
-    filtered_df = df_data[df_data['Position'] == pos]
-    filtered_df = filtered_df.drop(['S3 Bucket', 'Overlay Video'], axis=1)
-    filtered_df.to_excel(writer, sheet_name=f'{pos}_Sheet')
+    writer = pd.ExcelWriter(f"{pos}_sheet.xlsx", engine="xlsxwriter")
+    filtered_df = df_data[df_data["Position"] == pos]
+    filtered_df = filtered_df.drop(["S3 Bucket", "Overlay Video"], axis=1)
+    filtered_df.to_excel(writer, sheet_name=f"{pos}_Sheet")
     writer.close()
-    return dcc.send_file(f'{pos}_sheet.xlsx')
+    return dcc.send_file(f"{pos}_sheet.xlsx")
 
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)  # hot reloading enabled
+    app.run()  # hot reloading enabled
