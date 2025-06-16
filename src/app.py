@@ -1078,6 +1078,12 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     "zt-trevino@wiu.edu": "TelemetryRecruit1!",
     "blairzs@tiffin.edu": "TelemetryRecruit1!",
     "mparis1@walsh.edu": "TelemetryRecruit1!",
+    "pgordon1@butler.edu": "TelemetryRecruit1!",
+    "akern@wabash.edu": "TelemetryRecruit1!",
+    "lavelle.walker@davenport.edu": "TelemetryRecruit1!",
+    "pierren@wabash.edu": "TelemetryRecruit1!",
+    "cconnolly@niu.edu": "TelemetryRecruit1!",
+    "bakerwab@wabash.edu": "TelemetryRecruit1!",
 }
 
 # Initialize the Dash app
