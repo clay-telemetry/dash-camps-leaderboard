@@ -35,7 +35,7 @@ initial_popup = html.Div(
                              color="grey", size="md", style={"font-style": "italic"}),
                     dmc.Anchor(
                         dmc.Image(
-                            src="assets/images/ts-Wordmark-RGB-White.svg",
+                            src="assets/images/TS-Wordmark-RGB-White.svg",
                             style={"width": "100%", "transform": "scale(0.9)"}
                         ), align="center", href="https://telemetrysports.com"
                     ),
