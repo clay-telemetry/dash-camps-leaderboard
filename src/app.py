@@ -110,8 +110,13 @@ def create_data_table(df_data, main_table_id, filter_table_id, df_filter):
                     "width": "170px",
                     "maxWidth": "170px",
                     "textAlign": "center",
+                    "border": "1px solid #aba7a7"
                 },
-                style_data={"font-family": "arial", "backgroundColor": "#dfe8f1"},
+                style_data={
+                    "font-family": "arial",
+                    "backgroundColor": "#dfe8f1",
+                    "border": "1px solid #aba7a7"
+                },
                 css=[
                     {
                         "selector": ".dash-spreadsheet .Select-option",
@@ -123,10 +128,20 @@ def create_data_table(df_data, main_table_id, filter_table_id, df_filter):
                     },
                     {
                         "selector": ".dash-spreadsheet .Select-arrow",
-                        "rule": "border-top-color: #132257",
+                        "rule": "border-top-color: #1e2f3f",
                     },
-                    {"selector": ".dash-spreadsheet th:hover .column-header--sort", "rule": "color: #1e2f3f"},
-                    {"selector": ".dash-spreadsheet .Select:hover .Select-clear", "rule": "color: #1e2f3f"},
+                    {
+                        "selector": ".dash-spreadsheet td",
+                        "rule": "border-right: 1px solid #aba7a7; border-left: 1px solid #aba7a7",
+                    },
+                    {
+                        "selector": ".dash-spreadsheet th",
+                        "rule": "border-right: 1px solid #aba7a7; border-left: 1px solid #aba7a7",
+                    },
+                    {"selector": ".dash-spreadsheet th:hover .column-header--sort",
+                        "rule": "color: #1e2f3f"},
+                    {"selector": ".dash-spreadsheet .Select:hover .Select-clear",
+                        "rule": "color: #1e2f3f"},
                 ],
             ),
             # Main data table
@@ -151,7 +166,8 @@ def create_data_table(df_data, main_table_id, filter_table_id, df_filter):
                 style_as_list_view=True,
                 cell_selectable=True,
                 selected_rows=[],
-                style_filter={"backgroundColor": "#18639d25", "lineHeight": "30px"},
+                style_filter={"backgroundColor": "#18639d25",
+                              "lineHeight": "30px"},
                 style_data_conditional=[
                     {"if": {"column_id": "First Name"}, "font-weight": "bold"},
                     {"if": {"column_id": "Last Name"}, "font-weight": "bold"},
@@ -1087,7 +1103,8 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 # Initialize the Dash app
-app = dash.Dash(__name__, update_title="Loading Players...", suppress_callback_exceptions=True)
+app = dash.Dash(__name__, update_title="Loading Players...",
+                suppress_callback_exceptions=True)
 app.title = "Telemetry UIndy Mega Camp"
 server = app.server
 
@@ -1125,7 +1142,8 @@ app.index_string = """<!DOCTYPE html>
 app.layout = dmc.MantineProvider(
     html.Div(
         children=[
-            *[generate_position_downloads(i) for i in ["DB", "DL", "LB", "OL", "QB", "RB", "TE", "WR"]],
+            *[generate_position_downloads(i) for i in ["DB",
+                                                       "DL", "LB", "OL", "QB", "RB", "TE", "WR"]],
             components.initial_popup,
             components.header,
             dmc.Container(
@@ -1149,7 +1167,8 @@ app.layout = dmc.MantineProvider(
                                 id="search-input",
                                 type="text",
                                 placeholder="Search by player name...",
-                                style={"width": "15%", "textAlign": "left", "color": "#1e2f3f", "lineHeight": "25px"},
+                                style={"width": "15%", "textAlign": "left",
+                                       "color": "#1e2f3f", "lineHeight": "25px"},
                             ),
                             dmc.Text(
                                 " * CLICK ON A PLAYER BELOW TO VIEW SQUAT VIDEO AND SCORES * ",
@@ -1178,8 +1197,10 @@ app.layout = dmc.MantineProvider(
                     html.Br(),
                     dmc.Tabs(
                         [
-                            dmc.Tab("2025 Players", value="2025", style={"font-family": "arial", "color": "#1e2f3f"}),
-                            dmc.Tab("2024 Players", value="2024", style={"font-family": "arial", "color": "#1e2f3f"}),
+                            dmc.Tab("2025 Players", value="2025", style={
+                                    "font-family": "arial", "color": "#1e2f3f"}),
+                            dmc.Tab("2024 Players", value="2024", style={
+                                    "font-family": "arial", "color": "#1e2f3f"}),
                         ],
                         id="year-tabs",
                         value="2025",
@@ -1222,7 +1243,8 @@ def update_table_search(search_value, active_tab):
         if active_tab == "2024":
             filtered_data = df_2024[
                 df_2024.apply(
-                    lambda row: search_value.lower() in row["First Name"].lower()
+                    lambda row: search_value.lower(
+                    ) in row["First Name"].lower()
                     or search_value.lower() in row["Last Name"].lower(),
                     axis=1,
                 )
@@ -1230,7 +1252,8 @@ def update_table_search(search_value, active_tab):
         else:
             filtered_data = df_2025[
                 df_2025.apply(
-                    lambda row: search_value.lower() in row["First Name"].lower()
+                    lambda row: search_value.lower(
+                    ) in row["First Name"].lower()
                     or search_value.lower() in row["Last Name"].lower(),
                     axis=1,
                 )
@@ -1250,7 +1273,7 @@ def update_table_search(search_value, active_tab):
 )
 def pagination(page_current, current_data):
     if page_current == 0:
-        return current_data[page_current * 100 : (page_current + 1) * 100]
+        return current_data[page_current * 100: (page_current + 1) * 100]
     else:
         return dash.no_update
 
@@ -1337,7 +1360,7 @@ def update_table_dropdown_sort(timestamp, sort_by, filter_rows, page_current, ac
     else:
         dff = data
 
-    return dff.iloc[page_current * 100 : (page_current + 1) * 100].to_dict("records")
+    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict("records")
 
 
 @app.callback(
@@ -1408,7 +1431,7 @@ def sort(sort_by, page_current, tabledata):
     else:
         dff = data
 
-    return dff.iloc[page_current * 100 : (page_current + 1) * 100].to_dict("records")
+    return dff.iloc[page_current * 100: (page_current + 1) * 100].to_dict("records")
 
 
 # Player popup callback
@@ -1510,7 +1533,8 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
                     ),
                     html.H2(
                         f"#{camp_num} | YR: {class_year} | POS: {pos} | SCHOOL: {school} | STATE: {state} ",
-                        style={"color": "#ffffff", "text-align": "center", "width": "100%", "margin": "5px"},
+                        style={"color": "#ffffff", "text-align": "center",
+                               "width": "100%", "margin": "5px"},
                     ),
                 ],
                 align="center",
@@ -1600,7 +1624,8 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
         children=[
             dmc.Group(
                 [
-                    html.H1("Flexibility Grade:", style={"text-align": "center", "color": "#ffffff"}),
+                    html.H1("Flexibility Grade:", style={
+                            "text-align": "center", "color": "#ffffff"}),
                     components.set_grade(flex_grade, "grade"),
                 ],
                 position="center",
@@ -1634,7 +1659,8 @@ def create_player_popup(selected_player, opened_state, style, show_popup):
             dmc.Stack(
                 [
                     dmc.Anchor(
-                        dmc.Image(src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
+                        dmc.Image(
+                            src="assets/images/TS-Horizontal-RGB-Inverse.svg"),
                         href="https://telemetrysports.com/",
                         style={
                             "align-items": "center",
